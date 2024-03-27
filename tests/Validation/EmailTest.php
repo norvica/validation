@@ -32,6 +32,12 @@ final class EmailTest extends ValidationTestCase
         $this->assertValid($value, new Email());
     }
 
+    #[DataProvider('valid')]
+    public function testValidDns(string $value): void
+    {
+        $this->assertValid($value, new Email(dns: true));
+    }
+
     public static function invalid(): Generator
     {
         yield 'only local part' => ['john.doe'];
@@ -51,5 +57,16 @@ final class EmailTest extends ValidationTestCase
     public function testInvalid(string $value): void
     {
         $this->assertInvalid($value, new Email());
+    }
+
+    public static function invalidDns(): Generator
+    {
+        yield 'domain does not exist' => ['john.doe@domainthatpresumablydoesnotexist.com'];
+    }
+
+    #[DataProvider('invalidDns')]
+    public function testInvalidDns(string $value): void
+    {
+        $this->assertInvalid($value, new Email(dns: true));
     }
 }

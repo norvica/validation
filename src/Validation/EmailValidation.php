@@ -9,7 +9,7 @@ use Norvica\Validation\Exception\ValueRuleViolation;
 
 final class EmailValidation
 {
-    public function __invoke(string $value, Email $constraint): void
+    public function __invoke(string $value, Email $rule): void
     {
         $message = 'Value must be a valid E-mail address';
 
@@ -24,7 +24,7 @@ final class EmailValidation
         }
 
         // DNS check (A/MX records)
-        if ($constraint->dns && !checkdnsrr($domain) && !checkdnsrr($domain, 'A')) {
+        if ($rule->dns && !checkdnsrr($domain) && !checkdnsrr($domain, 'A')) {
             throw new ValueRuleViolation($message);
         }
     }

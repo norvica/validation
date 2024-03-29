@@ -9,19 +9,19 @@ use Norvica\Validation\Exception\ValueRuleViolation;
 
 final class TextValidation
 {
-    public function __invoke(string $value, Text $constraint): void
+    public function __invoke(string $value, Text $rule): void
     {
         $length = strlen($value);
 
-        if ($constraint->minLength !== null && $constraint->minLength > $length) {
-            throw new ValueRuleViolation("Value must be at least {$constraint->minLength} characters long");
+        if ($rule->minLength !== null && $rule->minLength > $length) {
+            throw new ValueRuleViolation("Value must be at least {$rule->minLength} characters long");
         }
 
-        if ($constraint->maxLength !== null && $constraint->maxLength < $length) {
-            throw new ValueRuleViolation("Value must be no more than  {$constraint->maxLength} characters long");
+        if ($rule->maxLength !== null && $rule->maxLength < $length) {
+            throw new ValueRuleViolation("Value must be no more than  {$rule->maxLength} characters long");
         }
 
-        if (null !== $constraint->regExp && !preg_match($constraint->regExp, $value)) {
+        if (null !== $rule->regExp && !preg_match($rule->regExp, $value)) {
             throw new ValueRuleViolation("Value doesn't match the required format");
         }
     }

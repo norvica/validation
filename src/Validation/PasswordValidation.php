@@ -9,7 +9,7 @@ use Norvica\Validation\Exception\ValueRuleViolation;
 
 final class PasswordValidation
 {
-    public function __invoke(string $value, Password $constraint): void
+    public function __invoke(string $value, Password $rule): void
     {
         $length = strlen($value);
 
@@ -17,8 +17,8 @@ final class PasswordValidation
             throw new ValueRuleViolation("Password must not be longer than 128 characters");
         }
 
-        if ($length < $constraint->min) {
-            throw new ValueRuleViolation("Password must be at least {$constraint->min} characters long");
+        if ($length < $rule->min) {
+            throw new ValueRuleViolation("Password must be at least {$rule->min} characters long");
         }
 
         $hasUpper = preg_match('#[A-Z]#', $value);
@@ -26,19 +26,19 @@ final class PasswordValidation
         $hasNumber = preg_match('#\d#', $value);
         $hasSpecial = preg_match('#[^A-Za-z0-9]#', $value);
 
-        if ($constraint->upper && !$hasUpper) {
+        if ($rule->upper && !$hasUpper) {
             throw new ValueRuleViolation("Password must contain at least 1 upper case character");
         }
 
-        if ($constraint->lower && !$hasLower) {
+        if ($rule->lower && !$hasLower) {
             throw new ValueRuleViolation("Password must contain at least 1 lower case character");
         }
 
-        if ($constraint->number && !$hasNumber) {
+        if ($rule->number && !$hasNumber) {
             throw new ValueRuleViolation("Password must contain at least 1 number");
         }
 
-        if ($constraint->special && !$hasSpecial) {
+        if ($rule->special && !$hasSpecial) {
             throw new ValueRuleViolation("Password must contain at least 1 special character");
         }
     }

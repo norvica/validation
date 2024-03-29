@@ -17,9 +17,9 @@ final class TextTest extends ValidationTestCase
     }
 
     #[DataProvider('valid')]
-    public function testValid(string $value, Text $constraint): void
+    public function testValid(string $value, Text $rule): void
     {
-        $this->assertValid($value, $constraint);
+        $this->assertValid($value, $rule);
     }
 
     public static function invalid(): Generator
@@ -30,8 +30,8 @@ final class TextTest extends ValidationTestCase
     }
 
     #[DataProvider('invalid')]
-    public function testInvalid(string $value, Text $constraint): void
+    public function testInvalid(string $value, Text $rule): void
     {
-        $this->assertInvalid($value, $constraint);
+        $this->assertInvalid($value, $rule);
     }
 }

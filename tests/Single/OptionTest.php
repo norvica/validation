@@ -24,9 +24,9 @@ final class OptionTest extends ValidationTestCase
 
     #[DataProvider('singleValid')]
     #[DataProvider('multipleValid')]
-    public function testValid(mixed $value, Option $constraint): void
+    public function testValid(mixed $value, Option $rule): void
     {
-        $this->assertValid($value, $constraint);
+        $this->assertValid($value, $rule);
     }
 
     public static function singleInvalid(): Generator
@@ -43,8 +43,8 @@ final class OptionTest extends ValidationTestCase
 
     #[DataProvider('singleInvalid')]
     #[DataProvider('multipleInvalid')]
-    public function testInvalid(mixed $value, Option $constraint): void
+    public function testInvalid(mixed $value, Option $rule): void
     {
-        $this->assertInvalid($value, $constraint);
+        $this->assertInvalid($value, $rule);
     }
 }

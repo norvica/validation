@@ -9,10 +9,10 @@ use Norvica\Validation\Exception\ValueRuleViolation;
 
 final class FlagValidation
 {
-    public function __invoke(bool $value, Flag $constraint): void
+    public function __invoke(bool $value, Flag $rule): void
     {
-        if ($value !== $constraint->value) {
-            $parameter = $constraint->value ? 'true' : 'false';
+        if ($value !== $rule->value) {
+            $parameter = $rule->value ? 'true' : 'false';
 
             throw new ValueRuleViolation("Value must be {$parameter}");
         }

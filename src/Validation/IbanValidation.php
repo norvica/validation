@@ -102,7 +102,7 @@ final class IbanValidation
         'XK' => 20,
     ];
 
-    public function __invoke(string $value, Iban $constraint): void
+    public function __invoke(string $value, Iban $rule): void
     {
         $message = 'Value must be a valid IBAN';
 

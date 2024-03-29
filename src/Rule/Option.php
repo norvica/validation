@@ -15,6 +15,7 @@ readonly class Option implements Rule, Normalizable
 {
     /**
      * @param string[] $options
+     * @param bool $multiple Allow multiple options.
      */
     public function __construct(
         public array $options,

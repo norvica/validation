@@ -20,9 +20,9 @@ final class NumberTest extends ValidationTestCase
     }
 
     #[DataProvider('valid')]
-    public function testValid(mixed $value, Number $constraint): void
+    public function testValid(mixed $value, Number $rule): void
     {
-        $this->assertValid($value, $constraint);
+        $this->assertValid($value, $rule);
     }
 
     public static function invalid(): Generator
@@ -35,8 +35,8 @@ final class NumberTest extends ValidationTestCase
     }
 
     #[DataProvider('invalid')]
-    public function testInvalid(mixed $value, Number $constraint): void
+    public function testInvalid(mixed $value, Number $rule): void
     {
-        $this->assertInvalid($value, $constraint);
+        $this->assertInvalid($value, $rule);
     }
 }

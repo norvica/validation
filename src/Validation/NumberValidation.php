@@ -9,14 +9,14 @@ use Norvica\Validation\Exception\ValueRuleViolation;
 
 final class NumberValidation
 {
-    public function __invoke(int|float $value, Number $constraint): void
+    public function __invoke(int|float $value, Number $rule): void
     {
-        if ($constraint->min !== null && $constraint->min > $value) {
-            throw new ValueRuleViolation("Value must be higher than {$constraint->min}");
+        if ($rule->min !== null && $rule->min > $value) {
+            throw new ValueRuleViolation("Value must be higher than {$rule->min}");
         }
 
-        if ($constraint->max !== null && $constraint->max < $value) {
-            throw new ValueRuleViolation("Value must be lower than {$constraint->min}");
+        if ($rule->max !== null && $rule->max < $value) {
+            throw new ValueRuleViolation("Value must be lower than {$rule->min}");
         }
     }
 }

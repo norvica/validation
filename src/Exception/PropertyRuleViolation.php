@@ -9,6 +9,9 @@ use Throwable;
 
 final class PropertyRuleViolation extends DomainException
 {
+    /**
+     * @var string[]
+     */
     public readonly array $path;
 
     public function __construct(
@@ -16,9 +19,18 @@ final class PropertyRuleViolation extends DomainException
         int $code = 0,
         Throwable|null $previous = null,
         array $path = [],
-    )
-    {
-        parent::__construct($message, $code, $previous);
+    ) {
         $this->path = $path;
+        parent::__construct("{$this->getPath()}: {$message}", $code, $previous);
+    }
+
+    public function getPath(): string
+    {
+        $formatted = '';
+        foreach ($this->path as $part) {
+            $formatted .= is_int($part) ? "[{$part}]" : ".{$part}";
+        }
+
+        return ltrim($formatted, '.');
     }
 }

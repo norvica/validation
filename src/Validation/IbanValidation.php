@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Norvica\Validation\Validation;
 
-use Norvica\Validation\Constraint\Iban;
-use Norvica\Validation\Exception\ConstraintViolation;
+use Norvica\Validation\Rule\Iban;
+use Norvica\Validation\Exception\ValueRuleViolation;
 
 /**
  * @see https://www.iban.com/structure
@@ -109,7 +109,7 @@ final class IbanValidation
         $country = substr($value, 0, 2);
         $length = self::LENGTH[$country] ?? null;
         if (strlen($value) !== $length) {
-            throw new ConstraintViolation($message);
+            throw new ValueRuleViolation($message);
         }
 
         // move first 4 chars (country code and check digits) to the end
@@ -123,7 +123,7 @@ final class IbanValidation
         $mod = self::mod($value, '97');
 
         if ($mod !== '1') {
-            throw new ConstraintViolation($message);
+            throw new ValueRuleViolation($message);
         }
     }
 

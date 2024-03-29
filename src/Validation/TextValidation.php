@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Norvica\Validation\Validation;
 
-use Norvica\Validation\Constraint\Text;
-use Norvica\Validation\Exception\ConstraintViolation;
+use Norvica\Validation\Rule\Text;
+use Norvica\Validation\Exception\ValueRuleViolation;
 
 final class TextValidation
 {
@@ -14,15 +14,15 @@ final class TextValidation
         $length = strlen($value);
 
         if ($constraint->minLength !== null && $constraint->minLength > $length) {
-            throw new ConstraintViolation("Value must be at least {$constraint->minLength} characters long");
+            throw new ValueRuleViolation("Value must be at least {$constraint->minLength} characters long");
         }
 
         if ($constraint->maxLength !== null && $constraint->maxLength < $length) {
-            throw new ConstraintViolation("Value must be no more than  {$constraint->maxLength} characters long");
+            throw new ValueRuleViolation("Value must be no more than  {$constraint->maxLength} characters long");
         }
 
         if (null !== $constraint->regExp && !preg_match($constraint->regExp, $value)) {
-            throw new ConstraintViolation("Value doesn't match the required format");
+            throw new ValueRuleViolation("Value doesn't match the required format");
         }
     }
 }

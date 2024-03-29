@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Norvica\Validation\Validation;
 
-use Norvica\Validation\Constraint\Uuid;
-use Norvica\Validation\Exception\ConstraintViolation;
+use Norvica\Validation\Rule\Uuid;
+use Norvica\Validation\Exception\ValueRuleViolation;
 
 final class UuidValidation
 {
@@ -13,7 +13,7 @@ final class UuidValidation
     {
         if ($constraint->version === null) {
             if (!preg_match('#^[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}$#i', $uuid)) {
-                throw new ConstraintViolation('Value must be a valid UUID');
+                throw new ValueRuleViolation('Value must be a valid UUID');
             }
 
             return;
@@ -21,7 +21,7 @@ final class UuidValidation
 
         $pattern = '#^[0-9A-F]{8}-[0-9A-F]{4}-' . $constraint->version . '[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$#i';
         if (!preg_match($pattern, $uuid)) {
-            throw new ConstraintViolation("Value must be a valid UUID (version {$constraint->version})");
+            throw new ValueRuleViolation("Value must be a valid UUID (version {$constraint->version})");
         }
     }
 }

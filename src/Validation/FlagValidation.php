@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Norvica\Validation\Validation;
 
-use Norvica\Validation\Constraint\Flag;
-use Norvica\Validation\Exception\ConstraintViolation;
+use Norvica\Validation\Rule\Flag;
+use Norvica\Validation\Exception\ValueRuleViolation;
 
 final class FlagValidation
 {
@@ -14,7 +14,7 @@ final class FlagValidation
         if ($value !== $constraint->value) {
             $parameter = $constraint->value ? 'true' : 'false';
 
-            throw new ConstraintViolation("Value must be {$parameter}");
+            throw new ValueRuleViolation("Value must be {$parameter}");
         }
     }
 }

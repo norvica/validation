@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Norvica\Validation\Validation;
 
-use Norvica\Validation\Constraint\Ip;
-use Norvica\Validation\Exception\ConstraintViolation;
+use Norvica\Validation\Rule\Ip;
+use Norvica\Validation\Exception\ValueRuleViolation;
 
 final class IpValidation
 {
@@ -20,7 +20,7 @@ final class IpValidation
         };
 
         if (!$valid) {
-            throw new ConstraintViolation(
+            throw new ValueRuleViolation(
                 $constraint->version
                     ? "Value must be a valid IPv{$constraint->version} address"
                     : 'Value must be a valid IP address'

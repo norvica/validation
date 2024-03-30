@@ -7,17 +7,17 @@ This PHP validation library aims to provide a powerful yet streamlined solution 
 core set of commonly used validation rules, along with the essential tools to easily define your own custom rules. The
 focus is on simplicity, organization, and flexibility.
 
-> [!TIP] 
-> Use the validator for DTOs (Data Transfer Objects) and structured data. Avoid using it for validating complex objects 
+> [!TIP]
+> Use the validator for DTOs (Data Transfer Objects) and structured data. Avoid using it for validating complex objects
 > like domain entities, which should enforce their validity through internal logic.
 
-**Contents**:
+## Contents
 
 - [Install](#install)
-- [Validate](#validate)
-  - [Single Values](#single-values)
-  - [Arrays](#arrays)
-  - [Objects](#objects)
+- [Instantiate Validator](#instantiate-validator)
+- [Validate Single Value](#validate-single-value)
+- [Validate Arrays](#validate-arrays)
+- [Validate Objects](#validate-objects)
 - [Validation Exceptions](#validation-exceptions)
 - [Strict Mode](#strict-mode)
 - [Creating Your Own Rules](#creating-your-own-rules)
@@ -33,7 +33,7 @@ In your project's root directory, run the following command:
 composer require norvica/validation
 ```
 
-## Validate
+## Instantiate Validator
 
 To start using the library, you'll first create an instance of the Validator class:
 
@@ -43,12 +43,13 @@ use Norvica\Validation\Validator;
 $validator = new Validator();
 ```
 
-### Single Values
+## Validate Single Value
 
 To validate a single value, use the `Validator::validate()`. The method takes two arguments:
+
 1. The value to validate: This is a data you want to check.
 2. A rule object: This object represents the validation rule you want to apply. The library provides various built-in
-  rules, and you can also create custom rules.
+   rules, and you can also create custom rules.
 
 ```php
 use Norvica\Validation\Rule\Email;
@@ -56,14 +57,15 @@ use Norvica\Validation\Rule\Email;
 $validator->validate('john.doe@example.com', new Email());
 ```
 
-### Arrays
+## Validate Arrays
 
 The library can validate arrays of data. Here's how you would do it:
+
 1. Create an array of data: This array will contain the key-value pairs you want to validate.
-2. Create an array of rules: The keys of this array should match the keys of your data array. The values are rule objects
-  that define the validation criteria for each field.
+2. Create an array of rules: The keys of this array should match the keys of your data array. The values are rule
+   objects that define the validation criteria for each field.
 3. Pass data and rules to the `validate()` method: The validator will check each value in the data array against its
-  corresponding rule.
+   corresponding rule.
 
 ```php
 use Norvica\Validation\Rule\Email;
@@ -76,12 +78,13 @@ $rules = ['email' => new Email(), 'password' => new Password()];
 $validator->validate($data, $rules);
 ```
 
-### Objects
+## Validate Objects
 
-#### Instances of `stdClass`
+### Instances of `stdClass`
 
 You can apply validation rules to objects as well. When working with `stdClass` instances, the process is similar to
 validating arrays:
+
 1. Create an instance of `stdClass`: This object will hold the properties you want to validate.
 2. Create an array of rules: The keys of your rules array should correspond to the property names within your stdClass
    object. The values will be rule objects.
@@ -101,15 +104,16 @@ $rules = ['email' => new Email(), 'password' => new Password()];
 $validator->validate($data, $rules);
 ```
 
-#### Data Transfer Objects
+### Data Transfer Objects
 
 Data Transfer Objects (DTOs) are simple objects designed to carry data between different parts of your application. Your
 validation library can streamline the process of ensuring that DTOs contain valid data. Here are two common approaches:
 
-1. Using an array of rules
-    - Similar to validating stdClass objects, create an array of rules where the keys match the names of the properties on
-      your DTO.
+1. **Using an array of rules**
+    - Similar to validating stdClass objects, create an array of rules where the keys match the names of the properties
+      on your DTO.
     - Pass the DTO and the rules array to the `validate()` method.
+
     ```php
     use Norvica\Validation\Rule\Email;
     use Norvica\Validation\Rule\Password;
@@ -128,9 +132,11 @@ validation library can streamline the process of ensuring that DTOs contain vali
     $validator->validate($data, $rules);
     ```
 
-2. Using rule attributes
+2. **Using rule attributes**
     - Define rule attributes on the DTO properties.
-    - Pass the DTO to the `validate()` method (the validator would need to be able to read and interpret these attributes).
+    - Pass the DTO to the `validate()` method (the validator would need to be able to read and interpret these
+      attributes).
+
     ```php
     use Norvica\Validation\Rule\Email;
     use Norvica\Validation\Rule\Password;
@@ -149,7 +155,7 @@ validation library can streamline the process of ensuring that DTOs contain vali
     $validator->validate($data);
     ```
 
-### Validation Exceptions
+## Validation Exceptions
 
 When a value fails to pass a validation rule, the library will signal this by throwing an exception. This allows
 you to handle validation errors gracefully and provide appropriate feedback to the user.
@@ -162,7 +168,7 @@ use Norvica\Validation\Exception\PropertyRuleViolation;
 $data = ['email' => 'john.doe', 'password' => 'P4$$w0rd'];
 $rules = ['email' => new Email(), 'password' => new Password()];
 
-try{
+try {
     $validator->validate($data, $rules);
 } catch (PropertyRuleViolation $e) {
     $e->getMessage(); // "email: Value must be a valid E-mail address"
@@ -170,15 +176,15 @@ try{
 }
 ```
 
-### Strict Mode
+## Strict Mode
 
-#### Default Behavior
+### Default Behavior
 
 By default, the validator operates in "strict" mode. This means that the library expects you to define explicit
 validation rules for **_all_** properties within an object or keys within an array that you pass for validation. If a
 property/key lacks a corresponding rule, the library will throw an exception.
 
-#### Purpose
+### Purpose
 
 Strict mode helps enforce data integrity and can prevent unexpected behavior. By requiring explicit validation, it
 encourages developers to think carefully about the expected format and constraints of the data they are handling.
@@ -192,10 +198,12 @@ $rules = [];
 $validator->validate($data, $rules); // will throw a `LogicException` with message "email: Validation rule is not configured."
 ```
 
-#### Disabling Strict Mode
+### Disabling Strict Mode
 
-If needed, you can disable strict mode by passing the `strict: false` flag to the `validate()` method. This allows you to
-validate only the data for which you've explicitly provided rules, while ignoring other properties or array elements.
+If needed, you can disable strict mode by passing the `strict: false` flag to the `validate()` method. This allows you
+to validate only the data for which you've explicitly provided rules, while ignoring other properties or array elements.
+
+**Example (Non-Strict Mode)**
 
 ```php
 $data = ['email' => 'john.doe@example.com'];
@@ -205,10 +213,9 @@ $validator->validate(value: $data, rules: $rules, strict: false); // will pass
 ```
 
 > [!IMPORTANT]  
-> Use non-strict mode with caution. Always consider the data integrity requirements of your application before
-> disabling strict mode.
+> Use non-strict mode with caution. Always consider the data integrity requirements of your application.
 
-### Creating Your Own Rules
+## Creating Your Own Rules
 
 The library provides flexibility by allowing you to extend its functionality with custom validation rules. Here's the
 process for defining your own rules:
@@ -222,7 +229,7 @@ process for defining your own rules:
     - Implement the `validator()` method, returning the fully qualified name of your validator class that you'll create
       next.
 
-    Example:
+   Example:
 
     ```php
     use Norvica\Validation\Rule\Rule;
@@ -246,12 +253,12 @@ process for defining your own rules:
 
     - Your validator should be a callable class (often a single-method class, as in the example).
     - The validator's __invoke() method will be called during the validation process. It receives:
-      - `$value`: The value being validated.
-      - `$rule`: An instance of your rule class.
+        - `$value`: The value being validated.
+        - `$rule`: An instance of your rule class.
     - Inside the `__invoke()` method, perform the necessary validation logic. If the validation fails, throw a
       `ValueRuleViolation` exception.
 
-    Example:
+   Example:
 
     ```php
     use Norvica\Validation\Exception\ValueRuleViolation;
@@ -271,9 +278,9 @@ process for defining your own rules:
 
 3. **Use Your Custom Rule**
 
-    Instantiate your custom rule object and include it in your validation rules array, just like any built-in rule:
+   Instantiate your custom rule object and include it in your validation rules array, just like any built-in rule:
 
-    Example:
+   Example:
 
     ```php
     $data = ['color' => '#5e759cff'];
@@ -281,17 +288,17 @@ process for defining your own rules:
     
     $validator->validate($data, $rules);
     ```
-   
+
 4. **Use Built-in or Custom Normalizers (Optional)**
 
-    The library allows you to apply normalizers to your data before validation, providing a way to preprocess and clean
-    up values. To use normalizers with your custom rule:
+   The library allows you to apply normalizers to your data before validation, providing a way to preprocess and clean
+   up values. To use normalizers with your custom rule:
 
     - Implement the `Normalizable` interface: Add the `Normalizable` interface to your rule class.
     - Implement the `normalizers()` method: This method should return an array of normalizer objects provided by the
       library or your own custom normalizers.
 
-    Example:
+   Example:
 
     ```php
     use Norvica\Validation\Rule\Rule;
@@ -312,164 +319,200 @@ process for defining your own rules:
     }
     ```
 
-    > [!NOTE]
-    > Normalizers modify the value **before** it reaches your validator. This can be useful for tasks like trimming 
-    > whitespace, converting to lowercase, or other transformations.
+> [!NOTE]
+> Normalizers modify the value **before** it reaches your validator. This can be useful for tasks like trimming
+> whitespace, converting to lowercase, or other transformations.
 
-    > [!NOTE]
-    > Normalizers **do not** change the original data; they provide a normalized copy for the validation process.
+> [!NOTE]
+> Normalizers **do not** change the original data; they provide a normalized copy for the validation process.
 
-### Built-in Rules
+## Built-in Rules
 
-- [**Email**](./src/Rule/Email.php)
-  - Purpose: Validates whether a value is a well-formatted email address.
-  - Options:
-    - `dns` (boolean, optional): If set to true, the rule performs additional DNS checks to verify that the email domain 
-      exists and has valid MX records. (Defaults to false).
+[**Email**](./src/Rule/Email.php)
 
-- [**Flag**](./src/Rule/Flag.php)
-  - Purpose: Enforces that a value is either `true` or `false` (a boolean flag).
-  - Options:
+- **Purpose**: Validates whether a value is a well-formatted email address.
+- **Options**:
+    - `dns` (boolean, optional): If set to true, the rule performs additional DNS checks to verify that the email
+      domain exists and has valid MX records. (Defaults to false).
+- **Examples**:
+  ```php
+  use Norvica\Validation\Rule\Email;
+
+  // no DNS checks
+  $rule = new Email();
+  
+  // with DNS checks
+  $rule = new Email(dns: true);
+  ```
+
+[**Flag**](./src/Rule/Flag.php)
+
+- **Purpose**: Enforces that a value is either `true` or `false` (a boolean flag).
+- **Options**:
     - `value` (boolean): Specifies whether the rule requires the value to be `true` or `false`.
+- **Examples**:
+  ```php
+  use Norvica\Validation\Rule\Flag;
 
-- [**Iban**](./src/Rule/Iban.php)
-  - Purpose: Validates whether a value conforms to the International Bank Account Number (IBAN) format.
+  // ensure value is `false`
+  $rule = new Flag(value: false);
+  
+  // ensure value is `true`
+  $rule = new Flag(value: false);
+  ```
 
-- [**Ip**](./src/Rule/Ip.php)
-  - Purpose: Validates whether a value represents a valid IP address (either IPv4 or IPv6).
-  - Options:
+[**Iban**](./src/Rule/Iban.php)
+
+- **Purpose**: Validates whether a value conforms to the International Bank Account Number (IBAN) format.
+- **Examples**:
+  ```php
+  use Norvica\Validation\Rule\Iban;
+
+  $rule = new Iban();
+  ```
+
+[**Ip**](./src/Rule/Ip.php)
+
+- **Purpose**: Validates whether a value represents a valid IP address (either IPv4 or IPv6).
+- **Options**:
     - `version` (int, optional): Specifies the desired IP version to validate.
-      - If `4`, validates only IPv4 addresses.
-      - If `6`, validates only IPv6 addresses.
-      - If `null` (default), validates both IPv4 and IPv6 addresses.
-  - Examples:
-    ```php
-    use Norvica\Validation\Rule\Ip;
+        - If `4`, validates only IPv4 addresses.
+        - If `6`, validates only IPv6 addresses.
+        - If `null` (default), validates both IPv4 and IPv6 addresses.
+- **Examples**:
+  ```php
+  use Norvica\Validation\Rule\Ip;
+  
+  // allow both IPv4 and IPv6
+  $rule = new Ip();
+  
+  // allow only IPv4
+  $rule = new Ip(4);
+  ```
 
-    // allow both IPv4 and IPv6
-    $rule = new Ip();
+[**Number**](./src/Rule/Number.php)
 
-    // allow only IPv4
-    $rule = new Ip(4);
-    ```
-
-- [**Number**](./src/Rule/Number.php)
-  - Purpose: Validates whether a value is a number within a specified range.
-  - Options:
+- **Purpose**: Validates whether a value is a number within a specified range.
+- **Options**:
     - `min` (int, float, optional): The minimum allowed value. Defaults to `null` (no minimum).
     - `max` (int, float, optional): The maximum allowed value. Defaults to `null` (no maximum).
-  - Examples:
-    ```php
-    use Norvica\Validation\Rule\Number;
+- **Examples**:
+  ```php
+  use Norvica\Validation\Rule\Number;
+  
+  // allow a number between 10 and 20 (inclusive)
+  $rule = new Number(min: 10, max: 20);
+      
+  // allow a number greater than or equal to 10
+  $rule = new Number(min: 10);
+      
+  // allow a number less than or equal to 20
+  $rule = new Number(max: 20);
+  ```
 
-    // allow a number between 10 and 20 (inclusive)
-    $rule = new Number(min: 10, max: 20);
-    
-    // allow a number greater than or equal to 10
-    $rule = new Number(min: 10);
-    
-    // allow a number less than or equal to 20
-    $rule = new Number(max: 20);
-    ```
+[**Option**](./src/Rule/Option.php)
 
-- [**Option**](./src/Rule/Option.php)
-  - Purpose: Validates whether a value (or values) exists within a predefined set of allowed options.
-  - Options:
+- **Purpose**: Validates whether a value (or values) exists within a predefined set of allowed options.
+- **Options**:
     - `options` (array of strings): Specifies the list of valid options.
     - `multiple` (boolean):
-      - If `true`, allows the value to be an array containing multiple valid options.
-      - If `false`, the value must be a single element from the options array.
-  - Examples:
-    ```php
-    use Norvica\Validation\Rule\Option;
+        - If `true`, allows the value to be an array containing multiple valid options.
+        - If `false`, the value must be a single element from the options array.
+- **Examples**:
+  ```php
+  use Norvica\Validation\Rule\Option;
+  
+  // allow single option
+  $rule = new Option(options: ['red', 'green', 'blue'], multiple: false);
+  
+  // allow multiple options (value must be an array containing elements from the options)
+  $rule = new Option(options: ['red', 'green', 'blue'], multiple: true);
+  ```
 
-    // allow single option
-    $rule = new Option(options: ['red', 'green', 'blue'], multiple: false);
+[**Password**](./src/Rule/Password.php)
 
-    // allow multiple options (value must be an array containing elements from the options)
-    $rule = new Option(options: ['red', 'green', 'blue'], multiple: true);
-    ```
-
-- [**Password**](./src/Rule/Password.php)
-  - Purpose: Enforces password complexity requirements, ensuring that user passwords meet a certain level of security.
-  - Options:
+- **Purpose**: Enforces password complexity requirements, ensuring that user passwords meet a certain level of security.
+- **Options**:
     - `min` (int, default: 8): Specifies the minimum required password length.
     - `upper` (bool, default: `true`): Requires at least one uppercase letter.
     - `lower` (bool, default: `true`): Requires at least one lowercase letter.
     - `number` (bool, default: `true`): Requires at least one numeric character.
     - `special` (bool, default: `true`): Requires at least one special character.
-  - Examples:
-    ```php
-    use Norvica\Validation\Rule\Password;
+- **Examples**:
+  ```php
+  use Norvica\Validation\Rule\Password;
+  
+  // stricter password requirements
+  $rule = new Password(min: 12, upper: true, lower: true, number: true, special: true);
+  
+  // more relaxed requirements
+  $rule = new Password(upper: false, lower: false);
+  ```
 
-    // stricter password requirements
-    $rule = new Password(min: 12, upper: true, lower: true, number: true, special: true);
+[**Slug**](./src/Rule/Slug.php)
 
-    // more relaxed requirements
-    $rule = new Password(upper: false, lower: false);
-    ```
+- **Purpose**: Specifically validates strings intended to be used as URL-friendly slugs (e.g., in blog post titles or
+  product identifiers).
+- **Inheritance**: The Slug rule inherits from the [**Text**](./src/Rule/Text.php) rule, re-using text validator.
+- **Default Behavior**: By default, enforces these constraints:
+    - **Minimum length**: 2 characters
+    - **Maximum length**: 64 characters
+    - **Allowed characters**: Lowercase letters, numbers, hyphens (`-`), and underscores (`_`).
+- **Examples**:
+  ```php
+  use Norvica\Validation\Rule\Slug;
+  
+  // a standard slug
+  $rule = new Slug();
+      
+  // enforce a stricter slug format (only lowercase letters and hyphens)
+  $rule = new Slug(regExp: '/^[a-z-]+$/');
+  ```
 
-- [**Slug**](./src/Rule/Slug.php)
-  - Purpose: Specifically validates strings intended to be used as URL-friendly slugs (e.g., in blog post titles or
-    product identifiers).
-  - Inheritance: The Slug rule inherits from the [**Text**](./src/Rule/Text.php) rule, re-using text validator.
-  - Default Behavior: By default, enforces these constraints:
-    - Minimum length: 2 characters
-    - Maximum length: 64 characters
-    - Allowed characters: Lowercase letters, numbers, hyphens (`-`), and underscores (`_`).
-  - Examples:
-    ```php
-    use Norvica\Validation\Rule\Slug;
+[**Text**](./src/Rule/Text.php)
 
-    // a standard slug
-    $rule = new Slug();
-    
-    // enforce a stricter slug format (only lowercase letters and hyphens)
-    $rule = new Slug(regExp: '/^[a-z-]+$/');
-    ```
-
-- [**Text**](./src/Rule/Text.php)
-  - Purpose: Validates textual input, providing flexible constraints based on length and regular expression patterns.
-  - Options:
+- **Purpose**: Validates textual input, providing flexible constraints based on length and regular expression patterns.
+- **Options**:
     - `minLength` (int, optional): Specifies the minimum allowed length of the text. Defaults to `null` (no minimum).
     - `maxLength` (int, optional): Specifies the maximum allowed length of the text. Defaults to `null` (no maximum).
-    - `regExp` (string, optional): Provides a regular expression pattern that the text must match. Defaults to `null` (no
-      pattern-based validation).
-  - Examples:
-    ```php
-    use Norvica\Validation\Rule\Text;
+    - `regExp` (string, optional): Provides a regular expression pattern that the text must match. Defaults
+      to `null` (no pattern-based validation).
+- **Examples**:
+  ```php
+  use Norvica\Validation\Rule\Text;
+  
+  // allow text between 5 and 20 characters
+  $rule = new Text(minLength: 5, maxLength: 20);
+      
+  // allow only numbers
+  $rule = new Text(regExp: '/^\d+$/');
+      
+  // allow a username format (letters, numbers, underscores, 6-12 characters)
+  $rule = new Text(minLength: 6, maxLength: 12, regExp: '/^[a-zA-Z0-9_]+$/');
+  ```
 
-    // allow text between 5 and 20 characters
-    $rule = new Text(minLength: 5, maxLength: 20);
-    
-    // allow only numbers
-    $rule = new Text(regExp: '/^\d+$/');
-    
-    // allow a username format (letters, numbers, underscores, 6-12 characters)
-    $rule = new Text(minLength: 6, maxLength: 12, regExp: '/^[a-zA-Z0-9_]+$/');
-    ```
+[**Uuid**](./src/Rule/Uuid.php)
 
-- [**Uuid**](./src/Rule/Uuid.php)
-  - Purpose: Validates whether a value conforms to the Universally Unique Identifier (UUID) format, optionally
-    specifying a particular UUID version.
-  - Options:
+- **Purpose**: Validates whether a value conforms to the Universally Unique Identifier (UUID) format, optionally
+  specifying a particular UUID version.
+- **Options**:
     - `version` (int, optional): Specifies the required UUID version. Valid options include:
-      - `1`: Validates Version 1 UUIDs
-      - `3`: Validates Version 3 UUIDs
-      - `4`: Validates Version 4 UUIDs
-      - `5`: Validates Version 5 UUIDs
-      - `7`: Validates Version 7 UUIDs
-      - If `null` (default), validates any valid UUID version.
-  - Examples:
-    ```php
-    use Norvica\Validation\Rule\Uuid;
-    
-    // allow any valid UUID versions
-    $rule = new Uuid();
+        - `1`: Validates Version 1 UUIDs
+        - `3`: Validates Version 3 UUIDs
+        - `4`: Validates Version 4 UUIDs
+        - `5`: Validates Version 5 UUIDs
+        - `7`: Validates Version 7 UUIDs
+        - If `null` (default), validates any valid UUID version.
+- **Examples**:
+  ```php
+  use Norvica\Validation\Rule\Uuid;
 
-    // allow only Version 4 UUIDs
-    $rule = new Uuid(4);
-    ```
+  // allow any valid UUID versions
+  $rule = new Uuid();
+  
+  // allow only Version 4 UUIDs
+  $rule = new Uuid(4);
+  ```
 
 ## TODO
 

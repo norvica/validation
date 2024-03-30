@@ -6,6 +6,7 @@ namespace Norvica\Validation;
 
 use Norvica\Validation\Exception\LogicException;
 use Norvica\Validation\Exception\PropertyRuleViolation;
+use Norvica\Validation\Instruction\EachX;
 use Norvica\Validation\Rule\Rule;
 use Norvica\Validation\Exception\ValueRuleViolation;
 use Norvica\Validation\Normalizer\Normalizable;
@@ -18,7 +19,7 @@ final class Validator
     /**
      * @throws ValueRuleViolation
      */
-    public function validate(mixed $value, Rule|array|null $rules = null, bool $strict = true): void
+    public function validate(mixed $value, Rule|EachX|array|null $rules = null, bool $strict = true): void
     {
         $this->traverse([], $strict, $value, $rules);
     }
@@ -27,11 +28,24 @@ final class Validator
      * @param string[] $path
      * @throws ValueRuleViolation
      */
-    private function traverse(array $path, bool $strict, mixed $value, Rule|array|null $rules = null): void
-    {
-        // scalar or list
-        if ($value === null || is_scalar($value) || (is_array($value) && array_is_list($value))) {
+    private function traverse(
+        array $path,
+        bool $strict,
+        mixed $value,
+        Rule|EachX|array|null $rules = null,
+    ): void {
+        // scalar
+        if ($value === null || is_scalar($value)) {
             $this->single($path, $strict, $value, $rules);
+
+            return;
+        }
+
+        // list
+        if (is_array($value) && array_is_list($value)) {
+            $rules instanceof EachX
+                ? $this->list($path, $strict, $value, $rules)
+                : $this->single($path, $strict, $value, $rules);
 
             return;
         }
@@ -51,6 +65,13 @@ final class Validator
         }
 
         throw new UnexpectedValueException(sprintf('Value of type %s cannot be validated.', get_debug_type($value)));
+    }
+
+    private function list(array $path, bool $strict, array $values, EachX $rules): void
+    {
+        foreach ($values as $key => $value) {
+            $this->traverse([...$path, $key], $strict, $value, $rules->rules);
+        }
     }
 
     /**

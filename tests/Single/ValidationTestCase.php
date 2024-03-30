@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Norvica\Validation\Single;
 
 use Norvica\Validation\Exception\PropertyRuleViolation;
+use Norvica\Validation\Instruction\EachX;
 use Norvica\Validation\Rule\Rule;
 use Norvica\Validation\Exception\ValueRuleViolation;
 use Norvica\Validation\Validator;
@@ -20,7 +21,7 @@ abstract class ValidationTestCase extends TestCase
         $this->validator = new Validator();
     }
 
-    public function assertValid(mixed $value, Rule|array|null $rules): void
+    public function assertValid(mixed $value, Rule|EachX|array|null $rules): void
     {
         try {
             $this->validator->validate($value, $rules);
@@ -31,7 +32,7 @@ abstract class ValidationTestCase extends TestCase
         $this->assertTrue(true);
     }
 
-    public function assertInvalid(mixed $value, Rule|array|null $rules, array $path = []): void
+    public function assertInvalid(mixed $value, Rule|EachX|array|null $rules, array $path = []): void
     {
         try {
             $this->validator->validate($value, $rules);

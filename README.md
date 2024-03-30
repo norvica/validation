@@ -218,7 +218,7 @@ $validator->validate('john.doe@example.com', new OrX(new Email(), new Uuid())); 
 $validator->validate('e2575f66-47ea-4152-ba1e-0ed63dec1e4f', new OrX(new Email(), new Uuid())); // will pass
 
 // Value must be BOTH a valid email AND should not exist in your system (your imaginary custom rule)
-$validator->validate($data, new AndX(new Email(), new Unique(table: 'users', column: 'username')));
+$validator->validate('john.doe@example.com', new AndX(new Email(), new Unique(table: 'users', column: 'username')));
 ```
 
 ## Validation Exceptions

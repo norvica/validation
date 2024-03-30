@@ -18,6 +18,8 @@ focus is on simplicity, organization, and flexibility.
 - [Validate Single Value](#validate-single-value)
 - [Validate Arrays](#validate-arrays)
 - [Validate Objects](#validate-objects)
+- [Validate Collections](#validate-collections)
+- [Logical Combinations With `AndX`, `OrX`](#logical-combinations-with-andx-and-orx)
 - [Validation Exceptions](#validation-exceptions)
 - [Strict Mode](#strict-mode)
 - [Creating Your Own Rules](#creating-your-own-rules)
@@ -154,6 +156,70 @@ validation library can streamline the process of ensuring that DTOs contain vali
     
     $validator->validate($data);
     ```
+
+## Validate Collections
+
+The library provides seamless ways to validate collections. Here are the common approaches:
+
+1. Validating Arrays of Values with `EachX`
+
+   Use the `EachX` instruction to apply the same validation rule to every element within an array.
+
+   Example:
+
+    ```php
+    use Norvica\Validation\Instruction\EachX;
+    use Norvica\Validation\Rule\Ip;
+    
+    $validator->validate(['127.0.0.1', '0.0.0.0'], new EachX(new Ip())); 
+    
+    ```
+
+2. Validating Nested Arrays or Objects
+
+   Create nested validation rule arrays to define rules for specific elements within arrays or objects.
+   The keys in your rules array should match the keys of the data being validated.
+
+   Example:
+
+    ```php
+    use Norvica\Validation\Instruction\EachX;
+    use Norvica\Validation\Rule\Uuid;
+    
+    $data = [
+        'users' => [
+            ['id' => '82de6575-7853-42d3-b962-dc466de7ce10'],
+            ['id' => 'e2575f66-47ea-4152-ba1e-0ed63dec1e4f'], 
+        ]
+    ];
+    
+    $rules = [
+        'users' => new EachX(['id' => new Uuid(4)]),
+    ];
+    
+    $validator->validate($data, $rules);
+    ```
+
+## Logical Combinations with `AndX` and `OrX`
+
+- `AndX`: Use this instruction when you want **_all_** of a set of rules to pass for a given value.
+- `OrX`:  Use this instruction when you want **_at least one_** of a set of rules to pass for a given value.
+
+Example:
+
+```php
+use Norvica\Validation\Instruction\AndX;
+use Norvica\Validation\Instruction\OrX;
+use Norvica\Validation\Rule\Email; 
+use Norvica\Validation\Rule\Uuid;
+
+// Value must be either a valid email OR a valid UUID
+$validator->validate('john.doe@example.com', new OrX(new Email(), new Uuid())); // will pass
+$validator->validate('e2575f66-47ea-4152-ba1e-0ed63dec1e4f', new OrX(new Email(), new Uuid())); // will pass
+
+// Value must be BOTH a valid email AND should not exist in your system (your imaginary custom rule)
+$validator->validate($data, new AndX(new Email(), new Unique(table: 'users', column: 'username')));
+```
 
 ## Validation Exceptions
 
@@ -516,8 +582,6 @@ process for defining your own rules:
 
 ## TODO
 
-- Collections
-- AndX, OrX
 - PSR Container Validators
 
 ## Alternative Validation Libraries

@@ -1,5 +1,6 @@
 # Validation
 
+[![Latest Stable Version](https://poser.pugx.org/norvica/validation/v/stable.png)](https://packagist.org/packages/norvica/validation)
 [![Checks](https://github.com/norvica/validation/actions/workflows/checks.yml/badge.svg)](https://github.com/norvica/validation/actions/workflows/checks.yml)
 
 This PHP validation library aims to provide a powerful yet streamlined solution for validating your data. It offers a

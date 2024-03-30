@@ -6,7 +6,9 @@ namespace Norvica\Validation;
 
 use Norvica\Validation\Exception\LogicException;
 use Norvica\Validation\Exception\PropertyRuleViolation;
+use Norvica\Validation\Instruction\AndX;
 use Norvica\Validation\Instruction\EachX;
+use Norvica\Validation\Instruction\OrX;
 use Norvica\Validation\Rule\Rule;
 use Norvica\Validation\Exception\ValueRuleViolation;
 use Norvica\Validation\Normalizer\Normalizable;
@@ -19,7 +21,7 @@ final class Validator
     /**
      * @throws ValueRuleViolation
      */
-    public function validate(mixed $value, Rule|EachX|array|null $rules = null, bool $strict = true): void
+    public function validate(mixed $value, Rule|EachX|AndX|OrX|array|null $rules = null, bool $strict = true): void
     {
         $this->traverse([], $strict, $value, $rules);
     }
@@ -32,8 +34,20 @@ final class Validator
         array $path,
         bool $strict,
         mixed $value,
-        Rule|EachX|array|null $rules = null,
+        Rule|EachX|AndX|OrX|array|null $rules = null,
     ): void {
+        if ($rules instanceof AndX) {
+            $this->andX($path, $strict, $value, $rules);
+
+            return;
+        }
+
+        if ($rules instanceof OrX) {
+            $this->orX($path, $strict, $value, $rules);
+
+            return;
+        }
+
         // scalar
         if ($value === null || is_scalar($value)) {
             $this->single($path, $strict, $value, $rules);
@@ -161,5 +175,30 @@ final class Validator
                 path: $path,
             );
         }
+    }
+
+    private function andX(array $path, bool $strict, mixed $value, AndX $rules): void
+    {
+        foreach ($rules->rules as $rule) {
+            $this->traverse($path, $strict, $value, $rule);
+        }
+    }
+
+    private function orX(array $path, bool $strict, mixed $value, OrX $rules): void
+    {
+        foreach ($rules->rules as $rule) {
+            try {
+                $this->traverse($path, $strict, $value, $rule);
+
+                return;
+            } catch (PropertyRuleViolation|ValueRuleViolation) {
+                continue;
+            }
+        }
+
+        throw new PropertyRuleViolation(
+            message: 'Value does not match any of the configured rules.',
+            path: $path,
+        );
     }
 }

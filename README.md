@@ -24,6 +24,7 @@ focus is on simplicity, organization, and flexibility.
 - [Validation Exceptions](#validation-exceptions)
 - [Strict Mode](#strict-mode)
 - [Creating Your Own Rules](#creating-your-own-rules)
+- [Validator Registry](#validator-registry)
 - [Built-in Rules](#built-in-rules)
 
 ## Install
@@ -393,6 +394,9 @@ process for defining your own rules:
         }
     }
     ```
+   
+   If your validator requires some **dependencies**, please refer to the [Validator Registry](#validator-registry) 
+   documentation section.
 
 3. **Use Your Custom Rule**
 
@@ -453,6 +457,148 @@ process for defining your own rules:
 
 > [!NOTE]
 > Normalizers **do not** change the original data; they provide a normalized copy for the validation process.
+
+## Validator Registry
+
+When creating custom validators that have external dependencies (like database connections or other services), you'll
+need a way to provide these dependencies to your validator instances. The library offers flexibility in how you approach
+this.
+
+Let's assume you have a custom rule `UniqueConstraint` and its corresponding validator `UniqueConstraintValidation`, 
+which requires a `PDO` instance.
+
+**Your rule**:
+
+```php
+use Norvica\Validation\Rule\Rule;
+
+#[\Attribute(\Attribute::TARGET_PROPERTY)]
+readonly class UniqueConstraint implements Rule
+{
+    public function __construct(
+        public string $table,
+        public string $column,
+    ) {
+    }
+    
+    public static function validator(): string
+    {
+        return UniqueConstraintValidator::class;
+    }
+}
+```
+
+**Your validation**:
+
+```php
+final readonly class UniqueConstraintValidation
+{
+    public function __construct(
+        private PDO $pdo,
+    ) {
+    }
+    
+    public function __invoke(string $value, UniqueConstraint $rule): void
+    {
+        // ...
+    }
+}
+```
+
+### Pass In a Map (Simplest)
+
+For straightforward use cases, create a map of validator class names to their instances and pass this directly to the
+Validator constructor.
+
+```php
+use Norvica\Validation\Validator;
+
+$pdo = new PDO('<your-connection-parameters>');
+$validation = new UniqueConstraintValidation($pdo);
+
+$validator = new Validator([UniqueConstraintValidation::class => $validation]);
+```
+
+### Implement Your Registry
+
+Create a custom `Registry` implementation to manage the creation of validator instances and their dependencies.
+
+**Your registry**:
+
+```php
+use Norvica\Validation\Exception\LogicException;
+use Norvica\Validation\Registry\Registry;
+
+class YourRegistry implements Registry
+{
+    public function get(string $validator): callable
+    {
+        if (!$this->has($validator)) {
+            throw new LogicException("Validator '{$validator}' not found.");
+        }
+
+        return ($this->instances()[$validator])();
+    }
+
+    public function has(string $validator): bool
+    {
+        return isset($this->instances()[$validator]);
+    }
+    
+    private function instances(): array
+    {
+        return [
+            UniqueConstraintValidation::class => function () {
+                $pdo = new PDO('<your-connection-parameters>');
+
+                return new UniqueConstraintValidation($pdo);
+            },
+        ];
+    }
+}
+```
+
+**Use**:
+
+```php
+$validator = new Validator($yourRegistry);
+```
+
+### Implement a Container Adapter
+
+If you're using a PSR-11 compatible dependency injection container (or any other DI container), create an adapter to 
+leverage it.
+
+**Your adapter**:
+
+```php
+use Norvica\Validation\Exception\LogicException;
+use Norvica\Validation\Registry\Registry;
+
+class YourAdapter implements Registry
+{
+    public function __construct(
+        private \Psr\Container\ContainerInterface $container, // assuming you're using PSR container
+    ) {
+    }
+    
+    public function get(string $validator): callable
+    {
+        return $this->container->get($validator);
+    }
+
+    public function has(string $validator): bool
+    {
+        return $this->container->has($validator);
+    }
+}
+```
+
+**Use**:
+
+```php
+$validator = new Validator($yourAdapter);
+```
 
 ## Built-in Rules
 

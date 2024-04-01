@@ -10,16 +10,27 @@ use Norvica\Validation\Instruction\AndX;
 use Norvica\Validation\Instruction\EachX;
 use Norvica\Validation\Instruction\OptionalX;
 use Norvica\Validation\Instruction\OrX;
+use Norvica\Validation\Registry\MapRegistry;
+use Norvica\Validation\Registry\Registry;
 use Norvica\Validation\Rule\Rule;
 use Norvica\Validation\Exception\ValueRuleViolation;
 use Norvica\Validation\Normalizer\Normalizable;
 use ReflectionClass;
 use ReflectionProperty;
 use stdClass;
+use TypeError;
 use UnexpectedValueException;
 
 final class Validator
 {
+    private Registry $registry;
+
+    public function __construct(
+        Registry|array $registry = [],
+    ) {
+        $this->registry = is_array($registry) ? new MapRegistry($registry) : $registry;
+    }
+
     /**
      * @throws ValueRuleViolation
      */
@@ -194,8 +205,10 @@ final class Validator
             }
         }
 
-        $class = $rule->validator();
-        $validator = new $class(); // TODO: allow PSR container integration
+        $validation = $rule->validator();
+        $validator = $this->registry->has($validation)
+            ? $this->registry->get($validation)
+            : new $validation();
 
         try {
             $validator($value, $rule);

@@ -15,10 +15,12 @@ use Override;
 readonly class Hostname implements Rule, Normalizable
 {
     /**
+     * @param string[] $hosts List of allowed hosts.
      * @param bool $dns Perform DNS record check.
      * @param bool $reserved Allow reserved TLDs.
      */
     public function __construct(
+        public array|null $hosts = null,
         public bool $dns = false,
         public bool $reserved = false,
     ) {

@@ -431,6 +431,8 @@ process for defining your own rules:
 
 - **Purpose**: Validates whether a value represents a valid hostname.
 - **Options**:
+    - `hosts` (array of strings, optional): If provided, restricts the validation to only allow URLs with specified
+      hostnames.
     - `dns` (boolean, default: `false`): If set to `true`, performs DNS record checks.
     - `reserved` (boolean, default: false): If set to `true`, allows using reserved TLDs (e.g., 'localhost', 
       'example', 'test', and 'invalid').
@@ -440,6 +442,12 @@ process for defining your own rules:
 
   // check for a valid hostname
   $rule = new Hostname();
+  
+  // allow only specific host 'example.com'
+  $rule = new Hostname(hosts: ['example.com']);
+  
+  // allow only specific host 'example.com' and its subdomains
+  $rule = new Hostname(hosts: ['*.example.com']);
 
   // perform PHPs built-in `checkdnsrr` DNS checks
   $rule = new Hostname(dns: true);

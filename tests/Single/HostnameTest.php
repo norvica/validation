@@ -32,6 +32,19 @@ final class HostnameTest extends ValidationTestCase
         $this->assertValid($value, new Hostname());
     }
 
+    public static function validWithHosts(): Generator
+    {
+        yield 'domain' => ['example.com', ['example.com']];
+        yield 'subdomain' => ['blog.example.com', ['*.example.com']];
+        yield 'nested subdomain' => ['admin.blog.example.com', ['*.example.com']];
+    }
+
+    #[DataProvider('validWithHosts')]
+    public function testValidWithHosts(string $value, array $hosts): void
+    {
+        $this->assertValid($value, new Hostname(hosts: $hosts));
+    }
+
     public static function invalid(): Generator
     {
         $a = str_pad('', 63, 'a');
@@ -55,5 +68,17 @@ final class HostnameTest extends ValidationTestCase
     public function testInvalid(string $value): void
     {
         $this->assertInvalid($value, new Hostname());
+    }
+
+    public static function invalidWithHosts(): Generator
+    {
+        yield 'precise domain' => ['blog.example.com', ['example.com']];
+        yield 'precise subdomain' => ['admin.blog.example.com', ['blog.example.com']];
+    }
+
+    #[DataProvider('invalidWithHosts')]
+    public function testInvalidWithHosts(string $value, array $hosts): void
+    {
+        $this->assertInvalid($value, new Hostname(hosts: $hosts));
     }
 }

@@ -17,7 +17,7 @@ readonly class Url implements Rule, Normalizable
      * NOTICE: there's no support for IDN (internationalized domain names) or punycode domains.
      *
      * @param string[] $schemes Allowed schemes.
-     * @param string[] $hosts List allowed hosts.
+     * @param string[] $hosts List of allowed hosts.
      * @param bool $dns Perform DNS record check.
      * @param bool $reserved Allow reserved TLDs.
      */

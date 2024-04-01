@@ -27,19 +27,23 @@ final class UrlValidation
         }
 
         $host = $parts['host'] ?? '';
-        if ($rule->hosts !== null) {
-            $this->hosts($host, $rule->hosts);
-        }
+        if ($this->ip($host)) {
+            // don't allow bypassing hosts restrictions by entering an IP address
+            if ($rule->hosts !== null) {
+                throw new ValueRuleViolation('Value must contain a valid hostname');
+            }
 
-        if (str_starts_with($host, '[') && str_ends_with($host, ']')) {
-            // presumably IPv6
-            (new IpValidation())(trim($host, '[]'), new Ip(6));
-        } elseif (false !== filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
-            // IPv4
-            (new IpValidation())($host, new Ip(4));
+            (new IpValidation())(trim($host, '[]'), new Ip());
         } else {
             // hostname
-            (new HostnameValidation())($host, new Hostname(dns: $rule->dns, reserved: $rule->reserved));
+            (new HostnameValidation())(
+                $host,
+                new Hostname(
+                    hosts: $rule->hosts,
+                    dns: $rule->dns,
+                    reserved: $rule->reserved,
+                )
+            );
         }
 
         $path = $parts['path'] ?? '';
@@ -58,24 +62,9 @@ final class UrlValidation
         }
     }
 
-    /**
-     * @param string[] $hosts
-     */
-    public function hosts(string $host, array $hosts): void
+    private function ip(string $host): bool
     {
-        foreach ($hosts as $restriction) {
-            // full match
-            if ($host === $restriction || $host === "www.{$restriction}") {
-                return;
-            }
-
-            // wildcard match
-            if (str_starts_with($restriction, '*.')
-                && str_ends_with($host, ltrim($restriction, '*.'))) {
-                return;
-            }
-        }
-
-        throw new ValueRuleViolation('Host is not allowed');
+        return (str_starts_with($host, '[') && str_ends_with($host, ']')) // IPv6
+            || false !== filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4); // IPv4
     }
 }

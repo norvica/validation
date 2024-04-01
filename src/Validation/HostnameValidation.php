@@ -26,6 +26,10 @@ final class HostnameValidation
             throw new ValueRuleViolation($message);
         }
 
+        if ($rule->hosts !== null) {
+            $this->hosts($value, $rule->hosts);
+        }
+
         // missing TLD
         $parts = explode('.', $value);
         if (count($parts) < 2) {
@@ -41,5 +45,26 @@ final class HostnameValidation
         if ($rule->dns && !checkdnsrr($value, 'A') && !checkdnsrr($value, 'AAAA')) {
             throw new ValueRuleViolation($message);
         }
+    }
+
+    /**
+     * @param string[] $hosts
+     */
+    public function hosts(string $host, array $hosts): void
+    {
+        foreach ($hosts as $restriction) {
+            // full match
+            if ($host === $restriction || $host === "www.{$restriction}") {
+                return;
+            }
+
+            // wildcard match
+            if (str_starts_with($restriction, '*.')
+                && str_ends_with($host, ltrim($restriction, '*.'))) {
+                return;
+            }
+        }
+
+        throw new ValueRuleViolation('Host is not allowed');
     }
 }

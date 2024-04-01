@@ -385,6 +385,16 @@ process for defining your own rules:
     }
     ```
 
+   You can use one of the [built-in normalizers](./src/Normalizer) (which are simple callables) or create your own.
+
+    - `Binary`: Converts values to boolean `true` or `false`. Recognizes various representations of "on" (e.g., "On", 
+      "Yes", "1") and "off" (e.g., "Off", "No", "0").
+    - `Lower`: Converts all characters within a string to lowercase.
+    - `Upper`: Converts all characters within a string to uppercase.
+    - `Numeric`: Converts numeric string to a number.
+    - `Spaceless`: Removes all space characters from a string.
+    - `Trim`: Removes leading and trailing whitespace from a string.
+
 > [!NOTE]
 > Normalizers modify the value **before** it reaches your validator. This can be useful for tasks like trimming
 > whitespace, converting to lowercase, or other transformations.

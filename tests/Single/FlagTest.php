@@ -41,7 +41,6 @@ final class FlagTest extends ValidationTestCase
         yield 'string 0' => ['0'];
         yield 'integer 0' => [0];
         yield 'empty string' => [' '];
-        yield 'null' => [null];
     }
 
     #[DataProvider('off')]

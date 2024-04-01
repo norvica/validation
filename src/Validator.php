@@ -8,11 +8,13 @@ use Norvica\Validation\Exception\LogicException;
 use Norvica\Validation\Exception\PropertyRuleViolation;
 use Norvica\Validation\Instruction\AndX;
 use Norvica\Validation\Instruction\EachX;
+use Norvica\Validation\Instruction\OptionalX;
 use Norvica\Validation\Instruction\OrX;
 use Norvica\Validation\Rule\Rule;
 use Norvica\Validation\Exception\ValueRuleViolation;
 use Norvica\Validation\Normalizer\Normalizable;
 use ReflectionClass;
+use ReflectionProperty;
 use stdClass;
 use UnexpectedValueException;
 
@@ -21,7 +23,7 @@ final class Validator
     /**
      * @throws ValueRuleViolation
      */
-    public function validate(mixed $value, Rule|EachX|AndX|OrX|array|null $rules = null, bool $strict = true): void
+    public function validate(mixed $value, Rule|OptionalX|EachX|AndX|OrX|array|null $rules = null, bool $strict = true): void
     {
         $this->traverse([], $strict, $value, $rules);
     }
@@ -34,8 +36,25 @@ final class Validator
         array $path,
         bool $strict,
         mixed $value,
-        Rule|EachX|AndX|OrX|array|null $rules = null,
+        Rule|OptionalX|EachX|AndX|OrX|array|null $rules = null,
     ): void {
+        if ($value === null) {
+            if (!$rules instanceof OptionalX) {
+                throw new PropertyRuleViolation(
+                    message: 'Value is required',
+                    path: $path,
+                );
+            }
+
+            return;
+        }
+
+        if ($rules instanceof OptionalX) {
+            $this->optionalX($path, $strict, $value, $rules);
+
+            return;
+        }
+
         if ($rules instanceof AndX) {
             $this->andX($path, $strict, $value, $rules);
 
@@ -49,7 +68,7 @@ final class Validator
         }
 
         // scalar
-        if ($value === null || is_scalar($value)) {
+        if (is_scalar($value)) {
             $this->single($path, $strict, $value, $rules);
 
             return;
@@ -57,9 +76,11 @@ final class Validator
 
         // list
         if (is_array($value) && array_is_list($value)) {
-            $rules instanceof EachX
-                ? $this->list($path, $strict, $value, $rules)
-                : $this->single($path, $strict, $value, $rules);
+            match (true) {
+                $rules instanceof EachX => $this->list($path, $strict, $value, $rules),
+                $rules instanceof Rule => $this->single($path, $strict, $value, $rules),
+                default => $this->array($path, $strict, $value, $rules),
+            };
 
             return;
         }
@@ -95,9 +116,10 @@ final class Validator
     private function array(array $path, bool $strict, array $values, array|null $rules = null): void
     {
         $rules = $rules ?: [];
+        $keys = array_merge(array_keys($rules), array_keys($values));
 
-        foreach ($values as $key => $value) {
-            $this->traverse([...$path, $key], $strict, $value, $rules[$key] ?? null);
+        foreach ($keys as $key) {
+            $this->traverse([...$path, $key], $strict, $values[$key] ?? null, $rules[$key] ?? null);
         }
     }
 
@@ -117,11 +139,21 @@ final class Validator
         }
 
         $rc = new ReflectionClass($value);
-        foreach ($rc->getProperties() as $rp) {
-            $key = $rp->getName();
+        $tuples = array_map(static fn (ReflectionProperty $rp) => [$rp->getName(), $rp->getValue($value)], $rc->getProperties());
+        $pairs = array_combine(array_column($tuples, 0), array_column($tuples, 1));
+        $keys = array_merge(array_keys($rules), array_keys($pairs));
+
+        foreach ($keys as $key) {
             $rule = $rules[$key] ?? null;
+
+            // check if the rule is in attributes
             if ($rule === null) {
-                $attributes = $rp->getAttributes();
+                if (!$rc->hasProperty($key)) {
+                    continue;
+                }
+
+                $property = $rc->getProperty($key);
+                $attributes = $property->getAttributes();
                 foreach ($attributes as $attribute) {
                     $instance = $attribute->newInstance();
                     if (!$instance instanceof Rule) {
@@ -135,7 +167,7 @@ final class Validator
                 }
             }
 
-            $this->traverse([...$path, $key], $strict, $rp->getValue($value), $rule);
+            $this->traverse([...$path, $key], $strict, $pairs[$key] ?? null, $rule);
         }
     }
 
@@ -157,8 +189,8 @@ final class Validator
         }
 
         if ($rule instanceof Normalizable) {
-            foreach ($rule->normalizers() as $sanitize) {
-                $value = $sanitize($value);
+            foreach ($rule->normalizers() as $normalize) {
+                $value = $normalize($value);
             }
         }
 
@@ -200,5 +232,10 @@ final class Validator
             message: 'Value does not match any of the configured rules.',
             path: $path,
         );
+    }
+
+    private function optionalX(array $path, bool $strict, mixed $value, OptionalX $rules): void
+    {
+        $this->traverse($path, $strict, $value, $rules->rules);
     }
 }

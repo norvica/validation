@@ -20,6 +20,7 @@ focus is on simplicity, organization, and flexibility.
 - [Validate Objects](#validate-objects)
 - [Validate Collections](#validate-collections)
 - [Logical Combinations With `AndX`, `OrX`](#logical-combinations-with-andx-and-orx)
+- [Optional Values](#optional-values)
 - [Validation Exceptions](#validation-exceptions)
 - [Strict Mode](#strict-mode)
 - [Creating Your Own Rules](#creating-your-own-rules)
@@ -219,6 +220,57 @@ $validator->validate('e2575f66-47ea-4152-ba1e-0ed63dec1e4f', new OrX(new Email()
 
 // Value must be BOTH a valid email AND should not exist in your system (your imaginary custom rule)
 $validator->validate('john.doe@example.com', new AndX(new Email(), new Unique(table: 'users', column: 'username')));
+```
+
+## Optional Values
+
+The library provides flexibility when dealing with data that may contain optional parameters. Here are the two main
+approaches.
+
+### Wrapping Rules With `OptionalX`
+
+Use the `OptionalX` instruction to mark a rule as optional. This prevents validation errors if the corresponding property
+is not present in your data or if its value is `null`.
+
+```php
+use Norvica\Validation\Instruction\OptionalX;
+use Norvica\Validation\Rule\Url;
+
+$data = [];  // or `['website' => null]`
+
+// without `OptionalX`: would throw an exception if 'website' is missing or `null`
+$validator->validate(value: $data, rules: ['website' => new Url()]);
+
+// with `OptionalX`: validation of 'website' is skipped if missing or `null` 
+$validator->validate(value: $data, rules: ['website' => new OptionalX(new Url())]);
+```
+
+### Dynamic Rule Composition
+
+For more complex scenarios, create rule sets dynamically based on the existence of data. This allows fine-grained
+control over which rules are applied.
+
+```php
+class YourRulesRegistry
+{
+    public static function profileRules(array $data): array
+    {
+        $rules = [];
+        if (!empty($data['website'])) {
+            $rules['website'] = new Url();
+        }
+        
+        return $rules;
+    }
+}
+
+$data = [];  // or `['website' => null]`
+
+// compose rules based on provided data
+$rules = YourRulesRegistry::profileRules($data);
+
+// validate
+$validator->validate(value: $data, rules: $rules);
 ```
 
 ## Validation Exceptions
@@ -647,7 +699,6 @@ process for defining your own rules:
 ## TODO
 
 - PSR Container Validators
-- Optional Values
 
 ## Alternative Validation Libraries
 

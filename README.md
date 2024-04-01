@@ -842,10 +842,6 @@ $validator = new Validator($yourAdapter);
   $rule = new Uuid(4);
   ```
 
-## TODO
-
-- PSR Container Validators
-
 ## Alternative Validation Libraries
 
 Here are some other PHP validation libraries that you might consider depending on your project's requirements:

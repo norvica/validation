@@ -427,6 +427,24 @@ process for defining your own rules:
   $rule = new Flag(value: false);
   ```
 
+[**Hostname**](./src/Rule/Hostname.php)
+
+- **Purpose**: Validates whether a value represents a valid hostname.
+- **Options**:
+    - `dns` (boolean, default: `false`): If set to `true`, performs DNS record checks.
+    - `reserved` (boolean, default: false): If set to `true`, allows using reserved TLDs (e.g., 'localhost', 
+      'example', 'test', and 'invalid').
+- **Examples**:
+  ```php
+  use Norvica\Validation\Rule\Hostname;
+
+  // check for a valid hostname
+  $rule = new Hostname();
+
+  // perform PHPs built-in `checkdnsrr` DNS checks
+  $rule = new Hostname(dns: true);
+  ```
+
 [**Iban**](./src/Rule/Iban.php)
 
 - **Purpose**: Validates whether a value conforms to the International Bank Account Number (IBAN) format.
@@ -557,6 +575,34 @@ process for defining your own rules:
   $rule = new Text(minLength: 6, maxLength: 12, regExp: '/^[a-zA-Z0-9_]+$/');
   ```
 
+[**Url**](./src/Rule/Url.php)
+
+- **Purpose**: Validates whether a value represents a well-formed URL (Uniform Resource Locator).
+- **Options**:
+    - `schemes` (array of strings, default: `['http', 'https']`): Specifies a list of allowed URL schemes (e.g., 'http', 
+      'https', 'ftp', etc.).
+    - `hosts` (array of strings, optional): If provided, restricts the validation to only allow URLs with specified
+      hostnames.
+    - `dns` (boolean, default: `false`): If set to `true`, performs DNS record checks.
+    - `reserved` (boolean, default: false): If set to `true`, allows using reserved TLDs (e.g., 'localhost', 
+      'example', 'test', and 'invalid').
+- **Examples**:
+  ```php
+  use Norvica\Validation\Rule\Url;
+
+  // allow standard 'http' or 'https' URLs
+  $rule = new Url();
+
+  // allow only 'https' URLs for a specific host 'example.com'
+  $rule = new Url(schemes: ['https'], hosts: ['example.com']);
+  
+  // allow only 'https' URLs for a specific host 'example.com' and its subdomains
+  $rule = new Url(schemes: ['https'], hosts: ['*.example.com']);
+
+  // perform PHPs built-in `checkdnsrr` DNS checks
+  $rule = new Url(dns: true);
+  ```
+
 [**Uuid**](./src/Rule/Uuid.php)
 
 - **Purpose**: Validates whether a value conforms to the Universally Unique Identifier (UUID) format, optionally
@@ -583,6 +629,7 @@ process for defining your own rules:
 ## TODO
 
 - PSR Container Validators
+- Optional Values
 
 ## Alternative Validation Libraries
 

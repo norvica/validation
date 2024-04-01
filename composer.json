@@ -27,6 +27,9 @@
             "Tests\\Norvica\\Validation\\": "tests/"
         }
     },
+    "scripts": {
+        "test": "./vendor/bin/phpunit --testdox"
+    },
     "minimum-stability": "stable",
     "require": {
         "php": ">=8.2"

@@ -9,7 +9,7 @@ use Norvica\Validation\Instruction\EachX;
 use Norvica\Validation\Rule\Ip;
 use Norvica\Validation\Rule\Uuid;
 use PHPUnit\Framework\Attributes\DataProvider;
-use Tests\Norvica\Validation\Single\ValidationTestCase;
+use Tests\Norvica\Validation\ValidationTestCase;
 
 final class EachXTest extends ValidationTestCase
 {

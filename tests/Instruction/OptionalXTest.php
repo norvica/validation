@@ -9,7 +9,7 @@ use Norvica\Validation\Instruction\OptionalX;
 use Norvica\Validation\Rule\Email;
 use Norvica\Validation\Rule\Password;
 use PHPUnit\Framework\Attributes\DataProvider;
-use Tests\Norvica\Validation\Single\ValidationTestCase;
+use Tests\Norvica\Validation\ValidationTestCase;
 
 final class OptionalXTest extends ValidationTestCase
 {

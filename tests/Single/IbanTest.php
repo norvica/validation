@@ -7,6 +7,7 @@ namespace Tests\Norvica\Validation\Single;
 use Generator;
 use Norvica\Validation\Rule\Iban;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Tests\Norvica\Validation\ValidationTestCase;
 
 /**
  * @see https://www.iban.com/structure

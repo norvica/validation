@@ -7,6 +7,7 @@ namespace Tests\Norvica\Validation\Single;
 use Generator;
 use Norvica\Validation\Rule\Number;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Tests\Norvica\Validation\ValidationTestCase;
 
 final class NumberTest extends ValidationTestCase
 {

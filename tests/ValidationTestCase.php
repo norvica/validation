@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Tests\Norvica\Validation\Single;
+namespace Tests\Norvica\Validation;
 
 use Norvica\Validation\Exception\PropertyRuleViolation;
 use Norvica\Validation\Instruction\AndX;
 use Norvica\Validation\Instruction\EachX;
+use Norvica\Validation\Instruction\OptionalX;
 use Norvica\Validation\Instruction\OrX;
 use Norvica\Validation\Rule\Rule;
-use Norvica\Validation\Exception\ValueRuleViolation;
 use Norvica\Validation\Validator;
 use PHPUnit\Framework\TestCase;
 
@@ -23,7 +23,7 @@ abstract class ValidationTestCase extends TestCase
         $this->validator = new Validator();
     }
 
-    public function assertValid(mixed $value, Rule|EachX|AndX|OrX|array|null $rules): void
+    public function assertValid(mixed $value, Rule|OptionalX|EachX|AndX|OrX|array|null $rules): void
     {
         try {
             $this->validator->validate($value, $rules);
@@ -34,7 +34,7 @@ abstract class ValidationTestCase extends TestCase
         $this->assertTrue(true);
     }
 
-    public function assertInvalid(mixed $value, Rule|EachX|AndX|OrX|array|null $rules, array $path = []): void
+    public function assertInvalid(mixed $value, Rule|OptionalX|EachX|AndX|OrX|array|null $rules, array $path = []): void
     {
         try {
             $this->validator->validate($value, $rules);

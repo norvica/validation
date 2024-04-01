@@ -6,9 +6,8 @@ namespace Tests\Norvica\Validation\Single;
 
 use Generator;
 use Norvica\Validation\Rule\Ip;
-use Norvica\Validation\Exception\ValueRuleViolation;
-use Norvica\Validation\Validation\IpValidation;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Tests\Norvica\Validation\ValidationTestCase;
 
 final class IpTest extends ValidationTestCase
 {

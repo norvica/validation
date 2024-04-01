@@ -7,7 +7,7 @@ namespace Tests\Norvica\Validation\Instruction;
 use Norvica\Validation\Instruction\OrX;
 use Norvica\Validation\Rule\Email;
 use Norvica\Validation\Rule\Uuid;
-use Tests\Norvica\Validation\Single\ValidationTestCase;
+use Tests\Norvica\Validation\ValidationTestCase;
 
 final class OrXTest extends ValidationTestCase
 {

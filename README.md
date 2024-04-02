@@ -292,6 +292,7 @@ try {
 } catch (PropertyRuleViolation $e) {
     $e->getMessage(); // "email: Value must be a valid E-mail address"
     $e->getPath(); // "email"
+    $e->getText(); // "Value must be a valid E-mail address"
 }
 ```
 

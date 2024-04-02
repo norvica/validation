@@ -13,6 +13,7 @@ final class PropertyRuleViolation extends DomainException
      * @var string[]
      */
     public readonly array $path;
+    public readonly string $text;
 
     public function __construct(
         string $message = '',
@@ -21,6 +22,7 @@ final class PropertyRuleViolation extends DomainException
         array $path = [],
     ) {
         $this->path = $path;
+        $this->text = $message;
         parent::__construct("{$this->getPath()}: {$message}", $code, $previous);
     }
 
@@ -32,5 +34,10 @@ final class PropertyRuleViolation extends DomainException
         }
 
         return ltrim($formatted, '.');
+    }
+
+    public function getText(): string
+    {
+        return $this->text;
     }
 }

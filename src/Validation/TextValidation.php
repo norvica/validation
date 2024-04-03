@@ -18,7 +18,7 @@ final class TextValidation
         }
 
         if ($rule->maxLength !== null && $rule->maxLength < $length) {
-            throw new ValueRuleViolation("Value must be no more than  {$rule->maxLength} characters long");
+            throw new ValueRuleViolation("Value must be no more than {$rule->maxLength} characters long");
         }
 
         if (null !== $rule->regExp && !preg_match($rule->regExp, $value)) {

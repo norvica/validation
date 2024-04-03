@@ -21,8 +21,10 @@ focus is on simplicity, organization, and flexibility.
 - [Validate Collections](#validate-collections)
 - [Logical Combinations With `AndX`, `OrX`](#logical-combinations-with-andx-and-orx)
 - [Optional Values](#optional-values)
-- [Validation Exceptions](#validation-exceptions)
+- [Validation Results and Errors](#validation-results-and-errors)
 - [Strict Mode](#strict-mode)
+- [Accessing Normalized Data](#accessing-normalized-data)
+- [Configuring Validation Behavior with Options](#configuring-validation-behavior-with-options)
 - [Creating Your Own Rules](#creating-your-own-rules)
 - [Validator Registry](#validator-registry)
 - [Built-in Rules](#built-in-rules)
@@ -274,12 +276,18 @@ $rules = YourRulesRegistry::profileRules($data);
 $validator->validate(value: $data, rules: $rules);
 ```
 
-## Validation Exceptions
+## Validation Results and Errors
 
-When a value fails to pass a validation rule, the library will signal this by throwing an exception. This allows
-you to handle validation errors gracefully and provide appropriate feedback to the user.
+The  `validate()` method offers flexibility in how validation errors are handled. Here's how to work with the different
+modes.
 
-`PropertyRuleViolation` indicates that a specific property has violated a validation rule.
+### Throwing Exceptions (Default Behavior)
+
+By default, the first validation failure will throw a `PropertyRuleViolation` exception. This is useful for scenarios
+where you want immediate feedback and error handling. `PropertyRuleViolation` indicates that a specific property has
+violated a validation rule.
+
+**Example**:
 
 ```php
 use Norvica\Validation\Exception\PropertyRuleViolation;
@@ -293,6 +301,31 @@ try {
     $e->getMessage(); // "email: Value must be a valid E-mail address"
     $e->getPath(); // "email"
     $e->getText(); // "Value must be a valid E-mail address"
+}
+```
+
+### Aggregating Violations
+
+To collect all validation violations instead of stopping at the first one, pass an `Options` instance to the `validate()`
+method, setting the `throw` option to `false`.
+
+**Example**:
+
+```php
+use Norvica\Validation\Result;
+use Norvica\Validation\Options;  
+use Norvica\Validation\Exception\PropertyRuleViolation; 
+
+$data = ['email' => 'john.doe', 'password' => 'P4$$w0rd'];
+$rules = ['email' => new Email(), 'password' => new Password()];
+
+$result = $validator->validate($data, $rules, new Options(throw: false));
+
+if (!empty($result->violations)) {
+    // handle all errors the way you'd like, for instance:
+    foreach ($result->violations as $violation) {
+        echo $violation->getPath() . ": " . $violation->getText() . "\n";
+    }
 }
 ```
 
@@ -326,14 +359,77 @@ to validate only the data for which you've explicitly provided rules, while igno
 **Example (Non-Strict Mode)**
 
 ```php
+use Norvica\Validation\Options;
+
 $data = ['email' => 'john.doe@example.com'];
 $rules = [];
 
-$validator->validate(value: $data, rules: $rules, strict: false); // will pass
+$validator->validate($data, $rules, new Options(strict: false)); // will pass
 ```
 
 > [!IMPORTANT]  
 > Use non-strict mode with caution. Always consider the data integrity requirements of your application.
+
+## Accessing Normalized Data
+
+You can access a normalized version of the original data from the `$result->normalized` property.
+
+**Example**: 
+
+```php
+use Norvica\Validation\Rule\Email;
+use Norvica\Validation\Rule\Flag;
+
+readonly class SubscriptionDto
+{
+    public function __construct(
+        #[Email]
+        public string $email,
+        #[Flag(value: true)]
+        public bool $consent,
+    ) {}
+}
+
+$dto = new SubscriptionDto(' john.doe@EXAMPLE.com ', ' yes ');
+
+$result = $validator->validate($dto);
+$result->normalized; // will contain: ['email' => 'john.doe@example.com', 'consent' => true]
+```
+
+## Configuring Validation Behavior with Options
+
+The [**Options**](./src/Options.php) class enables control over how your validator processes data and handles errors.
+
+- `throw` (boolean, default: `true`): Controls whether the validator throws an exception immediately on the first
+  violation (`true`) or aggregates all violations into the result (`false`).
+- `strict` (boolean, default: `true`): Determines if an exception is thrown when data properties lack corresponding
+  validation rules.
+
+**Providing Options**:
+
+1. **Per Validation**: Pass an `Options` instance as an optional argument to the `validate()` method to customize
+   behavior for a specific validation run.
+2. **Validator-Wide Defaults**: During validator instantiation, provide an `Options` object to set default behaviors for
+   all subsequent validations performed by that validator instance.
+
+**Example**:
+
+```php
+use Norvica\Validation\Options;
+use Norvica\Validation\Validator;
+
+// Configure the validator's default behavior to aggregate violations 
+// instead of throwing an exception on the first error.
+$options = new Options(throw: false);
+$validator = new Validator($options);
+
+// Perform validation using the (non-throwing) behavior.
+$result = $validator->validate($data, $rules);
+
+// Override the default behavior for a single validation run. This will 
+// throw an exception on the first violation encountered.
+$validator->validate($data, $rules, new Options(throw: true));
+```
 
 ## Creating Your Own Rules
 

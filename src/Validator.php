@@ -15,28 +15,44 @@ use Norvica\Validation\Registry\Registry;
 use Norvica\Validation\Rule\Rule;
 use Norvica\Validation\Exception\ValueRuleViolation;
 use Norvica\Validation\Normalizer\Normalizable;
+use Norvica\Validation\Violation\Violation;
 use ReflectionClass;
 use ReflectionProperty;
 use stdClass;
-use TypeError;
 use UnexpectedValueException;
 
 final class Validator
 {
     private Registry $registry;
+    private Options $options;
 
     public function __construct(
         Registry|array $registry = [],
+        Options $options = null,
     ) {
+        $default = Options::default();
         $this->registry = is_array($registry) ? new MapRegistry($registry) : $registry;
+        $this->options = $options ? $default->merge($options) : $default;
     }
 
     /**
-     * @throws ValueRuleViolation
+     * @throws PropertyRuleViolation
      */
-    public function validate(mixed $value, Rule|OptionalX|EachX|AndX|OrX|array|null $rules = null, bool $strict = true): void
-    {
-        $this->traverse([], $strict, $value, $rules);
+    public function validate(
+        mixed $value,
+        Rule|OptionalX|EachX|AndX|OrX|array|null $rules = null,
+        Options $options = null,
+    ): Result {
+        $violations = [];
+        $normalized = $this->traverse(
+            [],
+            $options ? $this->options->merge($options) : $this->options,
+            $value,
+            $rules,
+            $violations,
+        );
+
+        return new Result(violations: $violations, normalized: $normalized);
     }
 
     /**
@@ -45,93 +61,99 @@ final class Validator
      */
     private function traverse(
         array $path,
-        bool $strict,
+        Options $options,
         mixed $value,
-        Rule|OptionalX|EachX|AndX|OrX|array|null $rules = null,
-    ): void {
+        Rule|OptionalX|EachX|AndX|OrX|array|null $rules,
+        array &$violations,
+    ): array|string|int|float|bool|null {
         if ($value === null) {
             if (!$rules instanceof OptionalX) {
-                throw new PropertyRuleViolation(
-                    message: 'Value is required',
-                    path: $path,
-                );
+                $this->violation($violations, $path, 'Value is required.', $options);
             }
 
-            return;
+            return null;
         }
 
         if ($rules instanceof OptionalX) {
-            $this->optionalX($path, $strict, $value, $rules);
-
-            return;
+            return $this->optionalX($path, $options, $value, $rules, $violations);
         }
 
         if ($rules instanceof AndX) {
-            $this->andX($path, $strict, $value, $rules);
-
-            return;
+            return $this->andX($path, $options, $value, $rules, $violations);
         }
 
         if ($rules instanceof OrX) {
-            $this->orX($path, $strict, $value, $rules);
-
-            return;
+            return $this->orX($path, $options, $value, $rules, $violations);
         }
 
         // scalar
         if (is_scalar($value)) {
-            $this->single($path, $strict, $value, $rules);
-
-            return;
+            return $this->single($path, $options, $value, $rules, $violations);
         }
 
         // list
         if (is_array($value) && array_is_list($value)) {
-            match (true) {
-                $rules instanceof EachX => $this->list($path, $strict, $value, $rules),
-                $rules instanceof Rule => $this->single($path, $strict, $value, $rules),
-                default => $this->array($path, $strict, $value, $rules),
+            return match (true) {
+                $rules instanceof EachX => $this->list($path, $options, $value, $rules, $violations),
+                $rules instanceof Rule => $this->single($path, $options, $value, $rules, $violations),
+                default => $this->array($path, $options, $value, $rules, $violations),
             };
-
-            return;
         }
 
         // associative array
         if (is_array($value)) {
-            $this->array($path, $strict, $value, $rules);
-
-            return;
+            return $this->array($path, $options, $value, $rules, $violations);
         }
 
         // object
         if (is_object($value)) {
-            $this->object($path, $strict, $value, $rules);
-
-            return;
+            return $this->object($path, $options, $value, $rules, $violations);
         }
 
         throw new UnexpectedValueException(sprintf('Value of type %s cannot be validated.', get_debug_type($value)));
     }
 
-    private function list(array $path, bool $strict, array $values, EachX $rules): void
-    {
+    private function list(
+        array $path,
+        Options $options,
+        array $values,
+        EachX $rules,
+        array &$violations,
+    ): array {
+        $normalized = [];
         foreach ($values as $key => $value) {
-            $this->traverse([...$path, $key], $strict, $value, $rules->rules);
+            $normalized[$key] = $this->traverse([...$path, $key], $options, $value, $rules->rules, $violations);
         }
+
+        return $normalized;
     }
 
     /**
      * @param string[] $path
      * @param array<string, Rule> $rules
      */
-    private function array(array $path, bool $strict, array $values, array|null $rules = null): void
-    {
+    private function array(
+        array $path,
+        Options $options,
+        array $values,
+        array|null $rules,
+        array &$violations,
+    ): array {
         $rules = $rules ?: [];
-        $keys = array_merge(array_keys($rules), array_keys($values));
+        $normalized = [];
+        $keys = array_unique(array_merge(array_keys($rules), array_keys($values)));
 
         foreach ($keys as $key) {
-            $this->traverse([...$path, $key], $strict, $values[$key] ?? null, $rules[$key] ?? null);
+            $normalized[$key] = $this->traverse(
+                [...$path, $key],
+                $options,
+                $values[$key] ?? null,
+                $rules[$key] ?? null,
+                $violations,
+            );
         }
+
+        return $normalized;
     }
 
     /**
@@ -139,20 +161,25 @@ final class Validator
      * @param array<string, Rule>|null $rules
      * @throws ValueRuleViolation
      */
-    private function object(array $path, bool $strict, object $value, array|null $rules = null): void
-    {
+    private function object(
+        array $path,
+        Options $options,
+        object $value,
+        array|null $rules,
+        array &$violations,
+    ): array {
         $rules = $rules ?: [];
 
         if ($value instanceof stdClass) {
-            $this->array($path, $strict, (array) $value, $rules);
-
-            return;
+            return $this->array($path, $options, (array) $value, $rules, $violations);
         }
 
+        // normalized objects are represented as associative arrays (key-value pairs)
+        $normalized = [];
         $rc = new ReflectionClass($value);
         $tuples = array_map(static fn (ReflectionProperty $rp) => [$rp->getName(), $rp->getValue($value)], $rc->getProperties());
         $pairs = array_combine(array_column($tuples, 0), array_column($tuples, 1));
-        $keys = array_merge(array_keys($rules), array_keys($pairs));
+        $keys = array_unique(array_merge(array_keys($rules), array_keys($pairs)));
 
         foreach ($keys as $key) {
             $rule = $rules[$key] ?? null;
@@ -178,25 +205,38 @@ final class Validator
                 }
             }
 
-            $this->traverse([...$path, $key], $strict, $pairs[$key] ?? null, $rule);
+            $normalized[$key] = $this->traverse(
+                [...$path, $key],
+                $options,
+                $pairs[$key] ?? null,
+                $rule,
+                $violations,
+            );
         }
+
+        return $normalized;
     }
 
     /**
      * @param string[] $path
      * @throws ValueRuleViolation
      */
-    private function single(array $path, bool $strict, array|string|int|float|bool|null $value, Rule|null $rule = null): void
-    {
+    private function single(
+        array $path,
+        Options $options,
+        array|string|int|float|bool|null $value,
+        Rule|null $rule,
+        array &$violations,
+    ): array|string|int|float|bool|null {
         if ($rule === null) {
-            if ($strict) {
+            if ($options->strict) {
                 throw new LogicException(
                     message: 'Validation rule is not configured.',
                     path: $path,
                 );
             }
 
-            return;
+            return $value;
         }
 
         if ($rule instanceof Normalizable) {
@@ -213,42 +253,73 @@ final class Validator
         try {
             $validator($value, $rule);
         } catch (ValueRuleViolation $e) {
-            throw new PropertyRuleViolation(
-                message: $e->getMessage(),
-                code: $e->getCode(),
-                previous: $e,
-                path: $path,
-            );
+            $this->violation($violations, $path, $e->getMessage(), $options);
+
+            return null;
         }
+
+        return $value;
     }
 
-    private function andX(array $path, bool $strict, mixed $value, AndX $rules): void
-    {
+    private function andX(
+        array $path,
+        Options $options,
+        mixed $value,
+        AndX $rules,
+        array &$violations,
+    ): array|string|int|float|bool|null {
+        $normalized = null;
         foreach ($rules->rules as $rule) {
-            $this->traverse($path, $strict, $value, $rule);
+            $normalized = $this->traverse($path, $options, $value, $rule, $violations);
         }
+
+        return $normalized;
     }
 
-    private function orX(array $path, bool $strict, mixed $value, OrX $rules): void
-    {
+    private function orX(
+        array $path,
+        Options $options,
+        mixed $value,
+        OrX $rules,
+        array &$violations,
+    ): array|string|int|float|bool|null {
         foreach ($rules->rules as $rule) {
             try {
-                $this->traverse($path, $strict, $value, $rule);
+                $downstream = [];
+                $normalized = $this->traverse($path, $options, $value, $rule, $downstream);
 
-                return;
+                if (count($downstream) === 0) {
+                    return $normalized;
+                }
             } catch (PropertyRuleViolation|ValueRuleViolation) {
                 continue;
             }
         }
 
-        throw new PropertyRuleViolation(
-            message: 'Value does not match any of the configured rules.',
-            path: $path,
-        );
+        $this->violation($violations, $path, 'Value does not match any of the configured rules.', $options);
+
+        return null;
     }
 
-    private function optionalX(array $path, bool $strict, mixed $value, OptionalX $rules): void
+    private function optionalX(
+        array $path,
+        Options $options,
+        mixed $value,
+        OptionalX $rules,
+        array &$violations,
+    ): array|string|int|float|bool|null {
+        return $this->traverse($path, $options, $value, $rules->rules, $violations);
+    }
+
+    private function violation(array &$violations, array $path, string $message, Options $options): void
     {
-        $this->traverse($path, $strict, $value, $rules->rules);
+        if ($options->throw) {
+            throw new PropertyRuleViolation(
+                message: $message,
+                path: $path,
+            );
+        }
+
+        $violations[] = new Violation(path: $path, message: $message);
     }
 }

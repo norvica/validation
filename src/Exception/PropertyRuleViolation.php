@@ -5,15 +5,13 @@ declare(strict_types=1);
 namespace Norvica\Validation\Exception;
 
 use DomainException;
+use Norvica\Validation\Violation\TraceableViolation;
+use Norvica\Validation\Violation\TraceableViolationTrait;
 use Throwable;
 
-final class PropertyRuleViolation extends DomainException
+final class PropertyRuleViolation extends DomainException implements TraceableViolation
 {
-    /**
-     * @var string[]
-     */
-    public readonly array $path;
-    public readonly string $text;
+    use TraceableViolationTrait;
 
     public function __construct(
         string $message = '',
@@ -24,20 +22,5 @@ final class PropertyRuleViolation extends DomainException
         $this->path = $path;
         $this->text = $message;
         parent::__construct("{$this->getPath()}: {$message}", $code, $previous);
-    }
-
-    public function getPath(): string
-    {
-        $formatted = '';
-        foreach ($this->path as $part) {
-            $formatted .= is_int($part) ? "[{$part}]" : ".{$part}";
-        }
-
-        return ltrim($formatted, '.');
-    }
-
-    public function getText(): string
-    {
-        return $this->text;
     }
 }

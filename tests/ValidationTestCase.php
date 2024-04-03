@@ -39,7 +39,7 @@ abstract class ValidationTestCase extends TestCase
         try {
             $this->validator->validate($value, $rules);
         } catch (PropertyRuleViolation $violation) {
-            $this->assertEquals($path, $violation->path);
+            $this->assertEquals($path, $violation->getRawPath());
 
             return;
         }

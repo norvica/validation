@@ -14,7 +14,7 @@ use Override;
 readonly class Flag implements Rule, Normalizable
 {
     public function __construct(
-        public bool $value,
+        public bool|null $value = null,
     ) {
     }
 

@@ -55,4 +55,10 @@ final class FlagTest extends ValidationTestCase
     {
         $this->assertInvalid($value, new Flag(false));
     }
+
+    public function testAnyBoolean(): void
+    {
+        $this->assertValid(true, new Flag());
+        $this->assertValid(false, new Flag());
+    }
 }

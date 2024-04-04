@@ -11,6 +11,11 @@ final class FlagValidation
 {
     public function __invoke(bool $value, Flag $rule): void
     {
+        // both `true` and `false` are allowed
+        if ($rule->value === null) {
+            return;
+        }
+
         if ($value !== $rule->value) {
             $parameter = $rule->value ? 'true' : 'false';
 

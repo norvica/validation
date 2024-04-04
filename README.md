@@ -718,18 +718,23 @@ $validator = new Validator($yourAdapter);
 
 [**Flag**](./src/Rule/Flag.php)
 
-- **Purpose**: Enforces that a value is either `true` or `false` (a boolean flag).
+- **Purpose**: Enforces that a value is either `true` or `false` (a boolean flag)
+  and [normalizes](#accessing-normalized-data) it if necessary.
 - **Options**:
-    - `value` (boolean): Specifies whether the rule requires the value to be `true` or `false`.
+    - `value` (boolean, default `null`): Enforces a specific value for the flag (true or false). Defaults to allowing
+      both `true` and `false`.
 - **Examples**:
   ```php
   use Norvica\Validation\Rule\Flag;
+  
+  // normalized result will contain the boolean value (`true` or `false`)
+  $rule = new Flag();
 
   // ensure value is `false`
   $rule = new Flag(value: false);
   
   // ensure value is `true`
-  $rule = new Flag(value: false);
+  $rule = new Flag(value: true);
   ```
 
 [**Hostname**](./src/Rule/Hostname.php)

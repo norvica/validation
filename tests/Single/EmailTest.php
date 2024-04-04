@@ -41,6 +41,7 @@ final class EmailTest extends ValidationTestCase
 
     public static function invalid(): Generator
     {
+        yield 'invalid domain' => ['a@b.c'];
         yield 'only local part' => ['john.doe'];
         yield 'no domain part' => ['john.doe@'];
         yield 'no local part' => ['@example.com'];

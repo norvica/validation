@@ -6,6 +6,7 @@ namespace Norvica\Validation\Validation;
 
 use Norvica\Validation\Rule\Email;
 use Norvica\Validation\Exception\ValueRuleViolation;
+use Norvica\Validation\Rule\Hostname;
 
 final class EmailValidation
 {
@@ -22,6 +23,8 @@ final class EmailValidation
         if (!preg_match('/^[a-zA-Z0-9.!$%&\'*+\/=?^_`{|}~-]{1,64}$/', $local)) {
             throw new ValueRuleViolation($message);
         }
+
+        (new HostnameValidation())($domain, new Hostname());
 
         // DNS check (A/MX records)
         if ($rule->dns && !checkdnsrr($domain) && !checkdnsrr($domain, 'A')) {

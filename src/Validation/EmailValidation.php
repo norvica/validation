@@ -24,7 +24,11 @@ final class EmailValidation
             throw new ValueRuleViolation($message);
         }
 
-        (new HostnameValidation())($domain, new Hostname());
+        try {
+            (new HostnameValidation())($domain, new Hostname());
+        } catch (ValueRuleViolation $e) {
+            throw new ValueRuleViolation(message: 'Value must contain a valid hostname', previous: $e);
+        }
 
         // DNS check (A/MX records)
         if ($rule->dns && !checkdnsrr($domain) && !checkdnsrr($domain, 'A')) {

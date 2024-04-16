@@ -28,7 +28,7 @@ abstract class ValidationTestCase extends TestCase
         try {
             $this->validator->validate($value, $rules);
         } catch (PropertyRuleViolation $violation) {
-            $this->fail("Failed asserting value '{$value}' passed validation. {$violation->getMessage()}.");
+            $this->fail("Failed asserting value '{$value}' passed validation. {$violation->getText()}.");
         }
 
         $this->assertTrue(true);

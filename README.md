@@ -11,7 +11,7 @@ focus is on simplicity, organization, and flexibility.
 > Use the validator for DTOs (Data Transfer Objects) and structured data. Avoid using it for validating complex objects
 > like domain entities, which should enforce their validity through internal logic.
 
-## Contents
+## Table Of Contents
 
 - [Install](#install)
 - [Instantiate Validator](#instantiate-validator)
@@ -529,7 +529,7 @@ process for defining your own rules:
     {
         // ...
 
-        public static function normalizers(): array
+        public function normalizers(): array
         {
             return [
                 new Trim(),
@@ -698,6 +698,48 @@ $validator = new Validator($yourAdapter);
 ```
 
 ## Built-in Rules
+
+[**DateTime**](./src/Rule/DateTime.php)
+
+- **Purpose**: Validates whether a value represents a valid date and/or time according to a specified format.
+- **Options**:
+    - `min` (`DateTimeImmutable`, optional): Sets a minimum allowed date/time.
+    - `max` (`DateTimeImmutable`, optional): Sets a maximum allowed date/time.
+    - `format` (string): Specifies the expected date/time format. See [PHP documentation](https://www.php.net/manual/en/datetime.format.php).
+- **Examples**:
+  ```php
+  use Norvica\Validation\Rule\DateTime;
+
+  // ISO8601 format (e.g. "2014-04-06T15:05:45+00:00")
+  $rule = new DateTime(format: DateTime::ISO8601);
+
+  // ISO8601 for the date portion only (e.g. "2014-04-06")
+  $rule = new DateTime(format: DateTime::ISO8601_DATE);
+
+  // ISO8601 for the time portion only (e.g. "15:05:45")
+  $rule = new DateTime(format: DateTime::ISO8601_TIME);
+
+  // ISO8601 with milliseconds (e.g. "2014-04-06T15:05:45.844+00:00")
+  $rule = new DateTime(format: DateTime::ISO8601_WITH_MILLISECONDS);
+
+  // ISO8601 with microseconds (e.g. "2014-04-06T15:05:45.844188+00:00")
+  $rule = new DateTime(format: DateTime::ISO8601_WITH_MICROSECONDS);
+
+  // dates before 18 years ago (age validation)
+  $rule = new DateTime(
+      max: new DateTimeImmutable('-18 years'),
+      format: DateTime::ISO8601_DATE,
+  );
+
+  // dates after Unix epoch start
+  $rule = new DateTime(
+      min: new DateTimeImmutable('1970-01-01'),
+      format: DateTime::ISO8601_DATE,
+  );
+
+  // custom format, hours and minutes (e.g. "15:45")
+  $rule = new DateTime(format: 'H:i');
+  ```
 
 [**Email**](./src/Rule/Email.php)
 

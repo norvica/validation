@@ -9,5 +9,5 @@ interface Normalizable
     /**
      * @return callable[]
      */
-    public static function normalizers(): array;
+    public function normalizers(): array;
 }

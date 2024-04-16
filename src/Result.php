@@ -13,7 +13,7 @@ final readonly class Result
      */
     public function __construct(
         public array $violations = [],
-        public array|string|int|float|bool|null $normalized = null,
+        public object|array|string|int|float|bool|null $normalized = null,
     ) {
     }
 }

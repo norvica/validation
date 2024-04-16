@@ -29,7 +29,7 @@ readonly class Password implements Rule, Normalizable
     }
 
     #[Override]
-    final public static function normalizers(): array
+    final public function normalizers(): array
     {
         return []; // password string should stay as is, no normalizers
     }

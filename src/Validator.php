@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Norvica\Validation;
 
+use DateTimeInterface;
 use Norvica\Validation\Exception\LogicException;
 use Norvica\Validation\Exception\PropertyRuleViolation;
 use Norvica\Validation\Instruction\AndX;
@@ -65,7 +66,7 @@ final class Validator
         mixed $value,
         Rule|OptionalX|EachX|AndX|OrX|array|null $rules,
         array &$violations,
-    ): array|string|int|float|bool|null {
+    ): object|array|string|int|float|bool|null {
         if ($value === null) {
             if (!$rules instanceof OptionalX) {
                 $this->violation($violations, $path, 'Value is required.', $options);
@@ -107,6 +108,11 @@ final class Validator
 
         // object
         if (is_object($value)) {
+            // object-level rule
+            if ($rules !== null && !is_array($rules)) {
+                return $this->single($path, $options, $value, $rules, $violations);
+            }
+
             return $this->object($path, $options, $value, $rules, $violations);
         }
 
@@ -224,10 +230,10 @@ final class Validator
     private function single(
         array $path,
         Options $options,
-        array|string|int|float|bool|null $value,
+        object|array|string|int|float|bool|null $value,
         Rule|null $rule,
         array &$violations,
-    ): array|string|int|float|bool|null {
+    ): object|array|string|int|float|bool|null {
         if ($rule === null) {
             if ($options->strict) {
                 throw new LogicException(
@@ -240,8 +246,14 @@ final class Validator
         }
 
         if ($rule instanceof Normalizable) {
-            foreach ($rule->normalizers() as $normalize) {
-                $value = $normalize($value);
+            try {
+                foreach ($rule->normalizers() as $normalize) {
+                    $value = $normalize($value);
+                }
+            } catch (ValueRuleViolation $e) {
+                $this->violation($violations, $path, $e->getMessage(), $options);
+
+                return null;
             }
         }
 

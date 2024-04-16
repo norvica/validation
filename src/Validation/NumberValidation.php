@@ -16,7 +16,7 @@ final class NumberValidation
         }
 
         if ($rule->max !== null && $rule->max < $value) {
-            throw new ValueRuleViolation("Value must be lower than {$rule->min}");
+            throw new ValueRuleViolation("Value must be lower than {$rule->max}");
         }
     }
 }

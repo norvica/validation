@@ -21,7 +21,7 @@ readonly class Text implements Rule, Normalizable
     }
 
     #[Override]
-    public static function normalizers(): array
+    public function normalizers(): array
     {
         return [
             new Trim(),

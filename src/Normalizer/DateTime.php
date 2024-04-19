@@ -5,8 +5,7 @@ declare(strict_types=1);
 namespace Norvica\Validation\Normalizer;
 
 use DateTimeImmutable;
-use Norvica\Validation\Exception\LogicException;
-use Norvica\Validation\Exception\ValueRuleViolation;
+use Norvica\Validation\Exception\NormalizationException;
 
 final readonly class DateTime
 {
@@ -17,11 +16,7 @@ final readonly class DateTime
 
     public function __invoke(string $value): DateTimeImmutable
     {
-        try {
-            $datetime = self::fromFormat($value, $this->format);
-        } catch (LogicException $e) {
-            throw new ValueRuleViolation($e->getMessage(), $e->getCode(), $e);
-        }
+        $datetime = self::fromFormat($value, $this->format);
 
         return self::toFormat($datetime, $this->format);
     }
@@ -32,7 +27,7 @@ final readonly class DateTime
     public static function fromFormat(string $value, string $format): DateTimeImmutable
     {
         if (false === $datetime = DateTimeImmutable::createFromFormat($format, $value)) {
-            throw new LogicException("Value must match the format '{$format}'");
+            throw new NormalizationException("Value must match the format '{$format}'");
         }
 
         // PHP can handle values outside typical ranges (e.g., the 13th month, 30 days in February) by adjusting them,
@@ -40,7 +35,7 @@ final readonly class DateTime
         // For instance '2024-13-15' would become '2025-01-15', and '2024-02-30' would become '2024-03-02'.
         // This check ensures the provided value aligns with the expected date format and catches such adjustments.
         if ($value !== $datetime->format($format)) {
-            throw new LogicException("Value must be a valid date/time within the specified format '{$format}'");
+            throw new NormalizationException("Value must be a valid date/time within the specified format '{$format}'");
         }
 
         return $datetime;

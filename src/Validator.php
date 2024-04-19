@@ -6,6 +6,7 @@ namespace Norvica\Validation;
 
 use DateTimeInterface;
 use Norvica\Validation\Exception\LogicException;
+use Norvica\Validation\Exception\NormalizationException;
 use Norvica\Validation\Exception\PropertyRuleViolation;
 use Norvica\Validation\Instruction\AndX;
 use Norvica\Validation\Instruction\EachX;
@@ -250,7 +251,7 @@ final class Validator
                 foreach ($rule->normalizers() as $normalize) {
                     $value = $normalize($value);
                 }
-            } catch (ValueRuleViolation $e) {
+            } catch (NormalizationException $e) {
                 $this->violation($violations, $path, $e->getMessage(), $options);
 
                 return null;

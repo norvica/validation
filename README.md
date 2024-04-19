@@ -7,6 +7,8 @@ This PHP validation library aims to provide a powerful yet streamlined solution 
 core set of commonly used validation rules, along with the essential tools to easily define your own custom rules. The
 focus is on simplicity, organization, and flexibility.
 
+Requires **PHP 8.2+**.
+
 > [!TIP]
 > Use the validator for DTOs (Data Transfer Objects) and structured data. Avoid using it for validating complex objects
 > like domain entities, which should enforce their validity through internal logic.

@@ -27,10 +27,10 @@ final class IpTest extends ValidationTestCase
 
     public static function invalidIpV4(): Generator
     {
-        yield 'out of range' => ['256.10.10.10'];
-        yield 'too few segments' => ['10.20.30'];
-        yield 'too many segments' => ['10.20.30.40.50'];
-        yield 'non-numeric characters' => ['192.168.0.x'];
+        yield 'out of range (V4)' => ['256.10.10.10'];
+        yield 'too few segments (V4)' => ['10.20.30'];
+        yield 'too many segments (V4)' => ['10.20.30.40.50'];
+        yield 'non-numeric characters (V4)' => ['192.168.0.x'];
     }
 
     #[DataProvider('invalidIpV4')]
@@ -54,9 +54,9 @@ final class IpTest extends ValidationTestCase
 
     public static function invalidIpV6(): Generator
     {
-        yield 'too many segments' => ['2001:0db8:85a3:0000:0000:8a2e:0370:7334:1'];
-        yield 'invalid HEX characters' => ['fe80:0000:0000:0000:0202:b3gg:fe1e:8329'];
-        yield 'invalid IPv4 embedding' => ['::ffff:300.1.1.5'];
+        yield 'too many segments (V6)' => ['2001:0db8:85a3:0000:0000:8a2e:0370:7334:1'];
+        yield 'invalid HEX characters (V6)' => ['fe80:0000:0000:0000:0202:b3gg:fe1e:8329'];
+        yield 'invalid IPv4 embedding (V6)' => ['::ffff:300.1.1.5'];
     }
 
     #[DataProvider('invalidIpV6')]

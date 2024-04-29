@@ -21,6 +21,9 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Pull builder image
+        run: docker pull docker pull ghcr.io/norvica/docs:latest
+
       - name: Build Documentation
         run: |
           docker run --rm -v $(pwd)/docs/content:/app/content -v $(pwd)/docs/config/_default:/app/config/_default -v $(pwd)/docs/public:/app/public -e HUGO_ENVIRONMENT=production -e HUGO_ENV=production ghcr.io/${{ github.repository_owner }}/docs-builder:latest npm run build -- --gc --minify --baseURL "https://validation.norvica.dev"

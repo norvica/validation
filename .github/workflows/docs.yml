@@ -7,7 +7,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: read
       deployments: write
 
     steps:
@@ -19,7 +18,7 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ secrets.GH_PACKAGES_TOKEN }}
 
       - name: Pull builder image
         run: docker pull ghcr.io/norvica/docs:latest

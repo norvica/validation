@@ -2,7 +2,7 @@
     "name": "norvica/validation",
     "description": "A simple, extensible, and unopinionated PHP validation library.",
     "type": "library",
-    "license": "BSD-3-Clause",
+    "license": "MIT",
     "keywords": [
         "php",
         "validation",

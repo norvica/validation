@@ -3,13 +3,13 @@ title: "Strict Mode"
 description: ""
 summary: ""
 date: 2024-04-21T19:44:18+02:00
-lastmod: 2024-04-21T19:44:18+02:00
+lastmod: 2024-05-23T19:58:35+02:00
 draft: false
 weight: 180
 toc: true
 seo:
   title: "" # custom title (optional)
-  description: "" # custom description (recommended)
+  description: "This page explains strict mode, which enforces explicit validation rules for all data properties and how to disable it." # custom description (recommended)
   canonical: "" # custom canonical URL (optional)
   noindex: false # false (default) or true
 ---

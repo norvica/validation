@@ -3,18 +3,18 @@ title: "Validation Errors"
 description: ""
 summary: ""
 date: 2024-04-21T19:33:08+02:00
-lastmod: 2024-04-21T19:33:08+02:00
+lastmod: 2024-05-23T19:58:35+02:00
 draft: false
 weight: 170
 toc: true
 seo:
   title: "" # custom title (optional)
-  description: "" # custom description (recommended)
+  description: "Handle PHP validation errors by either catching thrown exceptions for immediate feedback or aggregating violations for comprehensive error reporting." # custom description (recommended)
   canonical: "" # custom canonical URL (optional)
   noindex: false # false (default) or true
 ---
 
-The  `validate()` method offers flexibility in how validation errors are handled. Here's how to work with the different
+The `validate()` method offers flexibility in how validation errors are handled. Here's how to work with the different
 modes.
 
 ## Throwing Exceptions (Default Behavior)

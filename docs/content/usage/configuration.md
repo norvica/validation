@@ -3,12 +3,12 @@ title: "Configuration"
 description: ""
 summary: ""
 date: 2024-04-21T19:54:40+02:00
-lastmod: 2024-04-21T19:54:40+02:00
+lastmod: 2024-05-23T19:58:35+02:00
 draft: false
 weight: 190
 toc: true
 seo:
-  title: "" # custom title (optional)
+  title: "Control how your validator handles exceptions and undefined properties. Apply options globally or per validation run." # custom title (optional)
   description: "" # custom description (recommended)
   canonical: "" # custom canonical URL (optional)
   noindex: false # false (default) or true

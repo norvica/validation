@@ -3,13 +3,13 @@ title: "Composing Rule Sets"
 description: ""
 summary: ""
 date: 2024-04-21T17:45:42+02:00
-lastmod: 2024-04-21T17:45:42+02:00
+lastmod: 2024-05-23T19:58:35+02:00
 draft: false
 weight: 150
 toc: true
 seo:
   title: "" # custom title (optional)
-  description: "" # custom description (recommended)
+  description: "Learn how to compose complex validation rules using logical operators (AND/OR), handle optional values, and dynamically create rule sets based on data." # custom description (recommended)
   canonical: "" # custom canonical URL (optional)
   noindex: false # false (default) or true
 ---

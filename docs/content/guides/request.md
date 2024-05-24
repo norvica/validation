@@ -3,13 +3,13 @@ title: "HTTP Request"
 description: "Validating HTTP request payload using validation library."
 summary: ""
 date: 2024-04-21T17:45:42+02:00
-lastmod: 2024-04-21T17:45:42+02:00
+lastmod: 2024-05-23T19:58:35+02:00
 draft: false
 weight: 810
 toc: true
 seo:
   title: "" # custom title (optional)
-  description: "" # custom description (recommended)
+  description: "This small guide demonstrates how to integrate the validation library with your HTTP API built using a framework that implements PSR-7 request and response interfaces." # custom description (recommended)
   canonical: "" # custom canonical URL (optional)
   noindex: false # false (default) or true
 ---

@@ -3,12 +3,12 @@ title: "Custom Rules"
 description: ""
 summary: ""
 date: 2024-04-21T18:51:00+02:00
-lastmod: 2024-04-21T18:51:00+02:00
+lastmod: 2024-05-23T19:58:35+02:00
 draft: false
 weight: 140
 toc: true
 seo:
-  title: "" # custom title (optional)
+  title: "This page explains how to create custom validation rules by defining rule and validator classes, using optional normalizers, and managing validator dependencies." # custom title (optional)
   description: "" # custom description (recommended)
   canonical: "" # custom canonical URL (optional)
   noindex: false # false (default) or true

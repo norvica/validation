@@ -2,6 +2,7 @@
 title : "Validation"
 description: ""
 lead: "A simple and extensible PHP validation library"
+cta: "/usage/quick-start/"
 date: 2024-04-21T19:33:08+02:00
 lastmod: 2024-04-21T19:33:08+02:00
 draft: false

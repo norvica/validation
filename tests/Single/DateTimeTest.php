@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Norvica\Validation\Single;
 
 use DateTimeImmutable;
+use DateTimeZone;
 use Generator;
 use Norvica\Validation\Rule\DateTime;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -244,6 +245,20 @@ final class DateTimeTest extends ValidationTestCase
             new DateTime(
                 max: new DateTimeImmutable('-18 years'),
                 format: DateTime::ISO8601_DATE,
+            ),
+        ];
+
+        yield 'timezone identifier in format' => [
+            (new DateTimeImmutable(timezone: new DateTimeZone('America/Caracas')))->format('Y-m-d\TH:i:s.ue'),
+            new DateTime(
+                format: 'Y-m-d\TH:i:s.ue',
+            ),
+        ];
+
+        yield 'timezone abbreviation in format' => [
+            (new DateTimeImmutable(timezone: new DateTimeZone('Australia/Adelaide')))->format('Y-m-d\TH:i:s.uT'),
+            new DateTime(
+                format: 'Y-m-d\TH:i:s.uT',
             ),
         ];
     }

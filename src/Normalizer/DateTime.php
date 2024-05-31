@@ -16,9 +16,7 @@ final readonly class DateTime
 
     public function __invoke(string $value): DateTimeImmutable
     {
-        $datetime = self::fromFormat($value, $this->format);
-
-        return self::toFormat($datetime, $this->format);
+        return self::fromFormat($value, $this->format);
     }
 
     /**
@@ -26,16 +24,54 @@ final readonly class DateTime
      */
     public static function fromFormat(string $value, string $format): DateTimeImmutable
     {
-        if (false === $datetime = DateTimeImmutable::createFromFormat($format, $value)) {
+        $parsed = date_parse_from_format($format, $value);
+        if ($parsed['warning_count'] > 0 || $parsed['error_count'] > 0) {
             throw new NormalizationException("Value must match the format '{$format}'");
         }
 
-        // PHP can handle values outside typical ranges (e.g., the 13th month, 30 days in February) by adjusting them,
-        // which may lead to unexpected results.
-        // For instance '2024-13-15' would become '2025-01-15', and '2024-02-30' would become '2024-03-02'.
-        // This check ensures the provided value aligns with the expected date format and catches such adjustments.
-        if ($value !== $datetime->format($format)) {
-            throw new NormalizationException("Value must be a valid date/time within the specified format '{$format}'");
+        if ($parsed['year'] !== false && $parsed['year'] < 1000) {
+            throw new NormalizationException("Value must be a valid date/time.");
+        }
+
+        if ($parsed['month'] !== false && ($parsed['month'] < 1 || $parsed['month'] > 12)) {
+            throw new NormalizationException("Value must be a valid date/time.");
+        }
+
+        if (!$parsed['is_localtime']) {
+            $offset = ['P', '+00:00'];
+        } else {
+            $offset = match ($parsed['zone_type']) {
+                1 => ['P', sprintf(
+                    '%s%02d:%02d',
+                    ($parsed['zone'] >= 0 ? '+' : '-'),
+                    abs((int) ($parsed['zone'] / 3600)),
+                    abs(($parsed['zone'] % 3600) / 60),
+                )],
+                2 => ['T', $parsed['tz_abbr']],
+                3 => ['e', $parsed['tz_id']],
+                default => throw new NormalizationException("Unknown timezone type '{$parsed['zone']}'."),
+            };
+        }
+
+        $ts = sprintf(
+            '%04d-%02d-%02dT%02d:%02d:%02d.%s%s',
+            $parsed['year'] ?: 1970,
+            $parsed['month'] ?: 1,
+            $parsed['day'] ?: 1,
+            $parsed['hour'] ?: 0,
+            $parsed['minute'] ?: 0,
+            $parsed['second'] ?: 0,
+            substr(number_format($parsed['fraction'] ?: 0.0, 6), 2),
+            $offset[1],
+        );
+
+        $datetime = DateTimeImmutable::createFromFormat(
+            $f = 'Y-m-d\TH:i:s.u' . $offset[0],
+            $ts,
+        );
+
+        if ($datetime === false) {
+            throw new NormalizationException("Failed to instantiate \DateTimeImmutable with '{$ts}' using format '{$f}'.");
         }
 
         return $datetime;
@@ -49,32 +85,6 @@ final readonly class DateTime
      */
     public static function toFormat(DateTimeImmutable $value, string $format): DateTimeImmutable
     {
-        preg_match_all(
-            '/(?<year>[YyXx])|(?<month>[FmMn])|(?<day>[dDjl])|(?<hour>[HhGg])|(?<minute>i)|(?<second>s)|(?<millisecond>v)|(?<microsecond>u)/',
-            $format,
-            $matches,
-        );
-
-        $matches = array_filter(array_map(static fn($item) => array_filter($item), $matches));
-        $year = isset($matches['year']) ? $value->format('Y') : '1970';
-        $month = isset($matches['month']) ? $value->format('m') : '01';
-        $day = isset($matches['day']) ? $value->format('d') : '01';
-        $hour = isset($matches['hour']) ? $value->format('H') : '00';
-        $minute = isset($matches['minute']) ? $value->format('i') : '00';
-        $second = isset($matches['second']) ? $value->format('s') : '00';
-        $offset = $value->format('P');
-
-        if (isset($matches['millisecond'])) {
-            $microsecond = $value->format('v') . '000';
-        } elseif (isset($matches['microsecond'])) {
-            $microsecond = $value->format('u');
-        } else {
-            $microsecond = '000000';
-        }
-
-        return DateTimeImmutable::createFromFormat(
-            \Norvica\Validation\Rule\DateTime::ISO8601_WITH_MICROSECONDS,
-            "{$year}-{$month}-{$day}T{$hour}:{$minute}:{$second}.{$microsecond}{$offset}",
-        );
+        return self::fromFormat($value->format($format), $format);
     }
 }

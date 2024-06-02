@@ -135,3 +135,6 @@ brand = "Norvica"
     #newsArticle = [] # NewsArticle sections
     #blogPosting = ["blog"] # BlogPosting sections
     #product = [] # Product sections
+
+[add_ons]
+  cloudflareAnalyticsToken = "ea0e6d5cf4654a51afd95be7afeb9362"
